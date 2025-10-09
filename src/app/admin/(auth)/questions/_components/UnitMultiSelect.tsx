@@ -24,7 +24,7 @@ interface ProgramSearcherProps {
   onUnitChange: (unitIds: string[]) => void;
 }
 
-export function PartnerSearcher({
+export function UnitMultiSelect({
   initialValue = ["ALL"],
   onUnitChange,
 }: ProgramSearcherProps) {
@@ -32,10 +32,8 @@ export function PartnerSearcher({
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedUnits, setSelectedUnits] = useState<string[]>(initialValue);
 
-  // API 데이터 조회
   const { units: apiUnits, isLoading, error } = useUnits(searchKeyword);
 
-  // 가나다 내림차순 정렬
   const units = useMemo(() => {
     return [...apiUnits].sort((a, b) => {
       return a.name.localeCompare(b.name, "ko-KR");

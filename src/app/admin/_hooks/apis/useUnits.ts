@@ -23,7 +23,7 @@ export function useUnits(keyword?: string) {
 
   const debouncedSearchParams = { keyword: debouncedKeyword };
   const queryString = buildQueryString(debouncedSearchParams);
-  const swrKey = queryString ? `/admin/units?${queryString}` : null;
+  const swrKey = queryString ? `/admin/units?${queryString}` : `/admin/units`;
 
   const { data, isLoading, error, mutate } = useSWR<BaseResponse<any>>(
     swrKey,

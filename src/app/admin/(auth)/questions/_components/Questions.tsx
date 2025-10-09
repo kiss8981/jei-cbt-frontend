@@ -4,13 +4,14 @@ import {
   useQuestions,
   UseQuestionsSearchParams,
 } from "@/app/admin/_hooks/apis/useQuestions";
-import { PaginationResultCount } from "@/components/ui/pagination";
+import { Pagination, PaginationResultCount } from "@/components/ui/pagination";
 import { useQuestionsFilterStore } from "@/lib/store/stores/questions-store";
 import { useMemo } from "react";
 import { QuestionsFilter } from "./QuestionsFilter";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { QuestionsTable } from "./QuestionsTable";
 
 const Questions = () => {
   const store = useQuestionsFilterStore();
@@ -65,14 +66,18 @@ const Questions = () => {
         pageSize={store.pageSize}
       />
 
-      {/* <ReviewTable
-        items={reviews}
+      <QuestionsTable
+        items={questions}
         isLoading={isLoading}
         pageNum={store.page}
         perPage={store.pageSize}
       />
 
-      <PaginationControls totalCount={totalCount} isLoading={isLoading} /> */}
+      <Pagination
+        totalCount={totalCount}
+        isLoading={isLoading}
+        useStore={useQuestionsFilterStore}
+      />
     </>
   );
 };

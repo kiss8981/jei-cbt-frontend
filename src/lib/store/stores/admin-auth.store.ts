@@ -1,5 +1,5 @@
 import { adminHttp } from "@/lib/http/admin-http";
-import { MeUserAuthAdminDto } from "@/lib/http/apis/dtos/admin/auth/me-auth.admin.dto";
+import { MeAuthAdminDto } from "@/lib/http/apis/dtos/admin/auth/me-auth.admin.dto";
 import { MeUserAuthAppDto } from "@/lib/http/apis/dtos/app/auth/me.auth.dto";
 import { http } from "@/lib/http/http";
 import { createStore } from "zustand";
@@ -7,12 +7,12 @@ import { createStore } from "zustand";
 export interface AdminAuthState {
   accessToken: string | null;
   refreshToken: string | null;
-  user: MeUserAuthAdminDto | null;
+  user: MeAuthAdminDto | null;
 }
 
 interface AdminAuthActions {
   setTokens: (accessToken: string, refreshToken: string) => void;
-  setUser: (user: MeUserAuthAdminDto | null) => void;
+  setUser: (user: MeAuthAdminDto | null) => void;
 }
 
 export const initialAdminAuthState: AdminAuthState = {
@@ -43,7 +43,7 @@ export const createAdminAuthStore = (
         "Authorization"
       ] = `Bearer ${accessToken}`;
     },
-    setUser: (user: MeUserAuthAdminDto | null) => {
+    setUser: (user: MeAuthAdminDto | null) => {
       set({ user });
     },
   }));

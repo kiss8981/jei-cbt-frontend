@@ -1,123 +1,139 @@
-import * as React from "react";
+"use client";
+
+import React, { useMemo } from "react";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreHorizontalIcon,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
-import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Label } from "./label";
-
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
-  return (
-    <nav
-      role="navigation"
-      aria-label="pagination"
-      data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
-      {...props}
-    />
-  );
+interface PaginationStore {
+  page: number;
+  pageSize: number;
+  setPage: (page: number) => void;
+  setPageSize: (size: number) => void;
 }
 
-function PaginationContent({
-  className,
-  ...props
-}: React.ComponentProps<"ul">) {
-  return (
-    <ul
-      data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
-      {...props}
-    />
-  );
+interface PaginationProps {
+  totalCount: number;
+  isLoading?: boolean;
+  pageSizeOptions?: number[];
+  showPageSizeSelector?: boolean;
+  useStore: () => PaginationStore;
 }
 
-function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="pagination-item" {...props} />;
-}
+export function Pagination({
+  totalCount,
+  isLoading = false,
+  pageSizeOptions = [5, 10, 20, 50],
+  showPageSizeSelector = true,
+  useStore,
+}: PaginationProps) {
+  const { page, pageSize, setPage, setPageSize } = useStore();
 
-type PaginationLinkProps = {
-  isActive?: boolean;
-} & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const canPreviousPage = page > 1;
+  const canNextPage = page < totalPages;
 
-function PaginationLink({
-  className,
-  isActive,
-  size = "icon",
-  ...props
-}: PaginationLinkProps) {
+  const handleFirstPage = () => setPage(1);
+  const handlePreviousPage = () => canPreviousPage && setPage(page - 1);
+  const handleNextPage = () => canNextPage && setPage(page + 1);
+  const handleLastPage = () => setPage(totalPages);
+
+  if (totalCount === 0) return null;
+
   return (
-    <a
-      aria-current={isActive ? "page" : undefined}
-      data-slot="pagination-link"
-      data-active={isActive}
-      className={cn(
-        buttonVariants({
-          variant: isActive ? "outline" : "ghost",
-          size,
-        }),
-        className
+    <div className="flex items-center justify-between px-4 py-4">
+      {showPageSizeSelector && (
+        <div className="hidden items-center gap-2 lg:flex">
+          <Label className="text-sm font-medium">페이지당 행 수</Label>
+          <Select
+            value={`${pageSize}`}
+            onValueChange={value => {
+              const size = Number(value);
+              if (Number.isFinite(size)) {
+                setPageSize(size);
+                setPage(1);
+              }
+            }}
+            disabled={isLoading}
+          >
+            <SelectTrigger className="w-20">
+              <SelectValue placeholder={pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {pageSizeOptions.map(size => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       )}
-      {...props}
-    />
+
+      <div className="flex w-fit items-center justify-center text-sm font-medium">
+        페이지 {page} / {totalPages}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          className="hidden h-8 w-8 p-0 lg:flex"
+          onClick={handleFirstPage}
+          disabled={!canPreviousPage || isLoading}
+          title="첫 페이지로"
+        >
+          <span className="sr-only">첫 페이지로</span>
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={handlePreviousPage}
+          disabled={!canPreviousPage || isLoading}
+          title="이전 페이지로"
+        >
+          <span className="sr-only">이전 페이지로</span>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={handleNextPage}
+          disabled={!canNextPage || isLoading}
+          title="다음 페이지로"
+        >
+          <span className="sr-only">다음 페이지로</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          className="hidden h-8 w-8 p-0 lg:flex"
+          onClick={handleLastPage}
+          disabled={!canNextPage || isLoading}
+          title="마지막 페이지로"
+        >
+          <span className="sr-only">마지막 페이지로</span>
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   );
 }
 
-function PaginationPrevious({
-  className,
-  ...props
-}: React.ComponentProps<typeof PaginationLink>) {
-  return (
-    <PaginationLink
-      aria-label="Go to previous page"
-      size="default"
-      className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
-      {...props}
-    >
-      <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
-    </PaginationLink>
-  );
-}
-
-function PaginationNext({
-  className,
-  ...props
-}: React.ComponentProps<typeof PaginationLink>) {
-  return (
-    <PaginationLink
-      aria-label="Go to next page"
-      size="default"
-      className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
-      {...props}
-    >
-      <span className="hidden sm:block">Next</span>
-      <ChevronRightIcon />
-    </PaginationLink>
-  );
-}
-
-function PaginationEllipsis({
-  className,
-  ...props
-}: React.ComponentProps<"span">) {
-  return (
-    <span
-      aria-hidden
-      data-slot="pagination-ellipsis"
-      className={cn("flex size-9 items-center justify-center", className)}
-      {...props}
-    >
-      <MoreHorizontalIcon className="size-4" />
-      <span className="sr-only">More pages</span>
-    </span>
-  );
-}
-
-interface ResultCountProps {
+interface PaginationResultCountProps {
   isLoading: boolean;
   error?: Error | null;
   totalCount: number;
@@ -128,7 +144,7 @@ interface ResultCountProps {
   noResultsText?: string;
 }
 
-function PaginationResultCount({
+export function PaginationResultCount({
   isLoading,
   error,
   totalCount,
@@ -137,8 +153,8 @@ function PaginationResultCount({
   loadingText = "로딩중...",
   errorText = "에러 발생",
   noResultsText = "검색 결과가 없습니다",
-}: ResultCountProps) {
-  const content = React.useMemo(() => {
+}: PaginationResultCountProps) {
+  const content = useMemo(() => {
     if (isLoading) return loadingText;
     if (error) return errorText;
     if (totalCount === 0) return noResultsText;
@@ -159,14 +175,3 @@ function PaginationResultCount({
 
   return <Label className="mr-auto">{content}</Label>;
 }
-
-export {
-  Pagination,
-  PaginationContent,
-  PaginationLink,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationEllipsis,
-  PaginationResultCount,
-};

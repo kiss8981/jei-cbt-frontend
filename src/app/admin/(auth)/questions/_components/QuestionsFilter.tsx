@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { FilterField } from "@/components/ui/filterField";
+import { UnitMultiSelect } from "./UnitMultiSelect";
 
 export function QuestionsFilter() {
   const router = useRouter();
@@ -67,13 +68,10 @@ export function QuestionsFilter() {
                   onChange={handleSearchChange}
                 />
               </FilterField>
-              <FilterField label="">
-                <Input
-                  type="text"
-                  placeholder="문제 이름"
-                  className="border-0 shadow-none hover:bg-accent"
-                  value={store.searchQuery}
-                  onChange={handleSearchChange}
+              <FilterField label="능력단위">
+                <UnitMultiSelect
+                  initialValue={store.unitFilter}
+                  onUnitChange={store.setUnitFilter}
                 />
               </FilterField>
             </TableRow>

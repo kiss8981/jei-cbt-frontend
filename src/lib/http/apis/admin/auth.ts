@@ -1,9 +1,9 @@
 import { BaseResponse, adminHttp } from "../../admin-http";
 import { useAdminAuthStore } from "@/lib/store/providers/admin-auth.provider";
-import { RefreshTokenResponseAuthAdminDto } from "../dtos/admin/auth/refresh-token-response.auth.dto";
-import { LoginUserResponseAuthAdminDto } from "../dtos/admin/auth/login-user-response.auth.dto";
-import { LoginUserAuthAdminDto } from "../dtos/admin/auth/login-user.auth.dto";
-import { MeUserAuthAdminDto } from "../dtos/admin/auth/me-auth.admin.dto";
+import { RefreshAuthTokenResponseAdminDto } from "../dtos/admin/auth/refresh-token-response.auth.dto";
+import { LoginAuthUserResponseAdminDto } from "../dtos/admin/auth/login-auth-user-response.admin.dto";
+import { LoginAuthUserAdminDto } from "../dtos/admin/auth/login-auth-user.admin.dto";
+import { MeAuthAdminDto } from "../dtos/admin/auth/me-auth.admin.dto";
 
 export const setAuth = async (accessToken: string, refreshToken: string) => {
   const { setTokens } = useAdminAuthStore(state => state);
@@ -17,7 +17,7 @@ export const getAuth = async () => {
 
 export const refreshToken = async (refreshToken: string) => {
   const response = await adminHttp.post<
-    BaseResponse<RefreshTokenResponseAuthAdminDto>
+    BaseResponse<RefreshAuthTokenResponseAdminDto>
   >("/admin/auth/refresh", {
     refreshToken,
   });
@@ -29,9 +29,9 @@ export const refreshToken = async (refreshToken: string) => {
   return response.data;
 };
 
-export const login = async (dto: LoginUserAuthAdminDto) => {
+export const login = async (dto: LoginAuthUserAdminDto) => {
   const response = await adminHttp.post<
-    BaseResponse<LoginUserResponseAuthAdminDto>
+    BaseResponse<LoginAuthUserResponseAdminDto>
   >("/admin/auth/login", dto);
   if (response.data.code !== 200) {
     throw new Error(response.data.message || "로그인에 실패했습니다.");
@@ -40,7 +40,7 @@ export const login = async (dto: LoginUserAuthAdminDto) => {
 };
 
 export const me = async (accessToken?: string) => {
-  const response = await adminHttp.get<BaseResponse<MeUserAuthAdminDto>>(
+  const response = await adminHttp.get<BaseResponse<MeAuthAdminDto>>(
     "/admin/auth/me",
     {
       headers: accessToken

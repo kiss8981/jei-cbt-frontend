@@ -8,6 +8,16 @@ export interface BaseResponse<T> {
   data: T;
 }
 
+export interface PaginationResponse<T> {
+  totalCount: number;
+
+  perPage: number;
+
+  pageNum: number;
+
+  items: T[];
+}
+
 export const adminHttp = axios.create({
   baseURL: process.env.NEXT_PUBLIC_URL + "/api",
   headers: {
