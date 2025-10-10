@@ -6,14 +6,16 @@ import { RegisterUserResponseAuthAppDto } from "../dtos/app/auth/register-user-r
 import { LoginUserAuthAppDto } from "../dtos/app/auth/login-user.auth.dto";
 import { LoginUserResponseAuthAppDto } from "../dtos/app/auth/login-user-response.auth.dto";
 import { MeUserAuthAppDto } from "../dtos/app/auth/me.auth.dto";
+import { getAuthStoreInstance } from "@/lib/store/stores/auth.store";
 
 export const setAuth = async (accessToken: string, refreshToken: string) => {
-  const { setTokens } = useAuthStore(state => state);
+  const { setTokens } = getAuthStoreInstance().getState();
   setTokens(accessToken, refreshToken);
 };
 
 export const getAuth = async () => {
-  const { accessToken, refreshToken } = useAuthStore(state => state);
+  const { accessToken, refreshToken } = getAuthStoreInstance().getState();
+  console.log("getAuth", { accessToken, refreshToken });
   return { accessToken, refreshToken };
 };
 

@@ -1,6 +1,12 @@
 "use client";
 
-import { type ReactNode, createContext, useRef, useContext } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useRef,
+  useContext,
+  useEffect,
+} from "react";
 import { type StoreApi, useStore } from "zustand";
 import {
   AuthState,
@@ -8,6 +14,7 @@ import {
   createAuthStore,
   initialAuthState,
 } from "../stores/auth.store";
+import { me, refreshToken } from "@/lib/http/apis/app/auth";
 
 export const AuthStoreContext = createContext<StoreApi<AuthStore> | null>(null);
 
@@ -24,6 +31,12 @@ export const AuthStoreProvider = ({
   if (!storeRef.current) {
     storeRef.current = createAuthStore(initStore);
   }
+
+  useEffect(() => {
+    setInterval(async () => {
+      const user = await me();
+    }, 30000);
+  }, []);
 
   return (
     <AuthStoreContext.Provider value={storeRef.current}>

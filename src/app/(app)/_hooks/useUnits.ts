@@ -1,16 +1,13 @@
 "use client";
 import useSWR from "swr";
+import { BaseResponse } from "@/lib/http/admin-http";
 import { useDebounce } from "@uidotdev/usehooks";
-import { adminHttpSWR, BaseResponse } from "@/lib/http/admin-http";
-export interface UseUnitsSearchParams {
-  keyword?: string;
-  page?: number;
-  limit?: number;
-}
+import { httpSWR } from "@/lib/http/http";
+import { GetUnitListQueryAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list-query.app.dto";
 
-export function useUnits(keyword?: string) {
-  const debouncedKeyword = useDebounce(keyword || "", 1000);
-  const buildQueryString = (params: UseUnitsSearchParams): string => {
+export const useUnits = (searchParams: GetUnitListQueryAppDto) => {
+  const debouncedKeyword = useDebounce(searchParams.keyword || "", 1500);
+  const buildQueryString = (params: GetUnitListQueryAppDto): string => {
     const queryParams = new URLSearchParams();
 
     if (params.keyword)
@@ -21,13 +18,13 @@ export function useUnits(keyword?: string) {
     return queryParams.toString();
   };
 
-  const debouncedSearchParams = { keyword: debouncedKeyword };
+  const debouncedSearchParams = { ...searchParams, keyword: debouncedKeyword };
   const queryString = buildQueryString(debouncedSearchParams);
-  const swrKey = queryString ? `/admin/units?${queryString}` : `/admin/units`;
+  const swrKey = queryString ? `/units?${queryString}` : `/units`;
 
   const { data, isLoading, error, mutate } = useSWR<BaseResponse<any>>(
     swrKey,
-    adminHttpSWR,
+    httpSWR,
     {
       revalidateOnFocus: false,
       dedupingInterval: 1000,
@@ -44,4 +41,4 @@ export function useUnits(keyword?: string) {
     error,
     refetch: mutate,
   };
-}
+};
