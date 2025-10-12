@@ -32,7 +32,15 @@ export function UnitMultiSelect({
   const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedUnits, setSelectedUnits] = useState<string[]>(initialValue);
 
-  const { units: apiUnits, isLoading, error } = useUnits(searchKeyword);
+  const {
+    units: apiUnits,
+    isLoading,
+    error,
+  } = useUnits({
+    keyword: searchKeyword,
+    limit: 20,
+    page: 1,
+  });
 
   const units = useMemo(() => {
     return [...apiUnits].sort((a, b) => {
