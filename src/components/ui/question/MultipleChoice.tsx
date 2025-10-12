@@ -89,12 +89,13 @@ export const QuestionMultipleChoice = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             {isMultiple ? (
-              options.map(optionItem => {
+              options.map((optionItem, key) => {
                 const isChecked = (multipleSelections as number[]).includes(
                   optionItem.id
                 );
                 return (
                   <div
+                    key={key}
                     id={`${optionItem.id}`}
                     className="flex items-center space-x-2"
                   >
@@ -121,9 +122,9 @@ export const QuestionMultipleChoice = ({
                 value={singleSelection ? String(singleSelection) : ""}
                 className="space-y-3"
               >
-                {options.map(optionItem => {
+                {options.map((optionItem, key) => {
                   return (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2" key={key}>
                       <RadioGroupItem
                         value={String(optionItem.id)}
                         id={`option-${optionItem.id}`}

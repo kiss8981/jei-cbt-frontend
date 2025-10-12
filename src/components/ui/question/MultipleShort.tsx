@@ -41,7 +41,7 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
   };
 
   const renderQuestionWithInputs = () => {
-    let parts = [];
+    const parts = [];
     let lastIndex = 0;
 
     placeholders.forEach(match => {
