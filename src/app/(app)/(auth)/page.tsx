@@ -2,11 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import useAppRouter from "@/hooks/useAppRouter";
+import { toast } from "sonner";
 
 export default function Home() {
   const { navigate } = useAppRouter();
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white px-3 mx-auto">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] bg-white px-3 mx-auto w-full">
       <div className="flex flex-col items-center">
         <img
           src="/images/logo.png"
@@ -19,15 +20,15 @@ export default function Home() {
         <Button onClick={() => navigate("push", "/learn/unit")} size="lg">
           능력 단위별 학습
         </Button>
-        <Button onClick={() => navigate("push", "/learn/all")} size="lg">
-          전체 문제 학습
+        <Button onClick={() => toast.error("준비중입니다.")} size="lg">
+          전체 문제 학습 (준비중)
         </Button>
         <Button
-          onClick={() => navigate("push", "/learn/mock")}
+          onClick={() => toast.error("준비중입니다.")}
           className="col-span-2"
           size="lg"
         >
-          모의고사
+          모의고사 (준비중)
         </Button>
       </div>
     </div>

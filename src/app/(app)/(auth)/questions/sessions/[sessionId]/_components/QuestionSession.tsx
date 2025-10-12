@@ -12,7 +12,7 @@ const QuestionSession = ({
     case "UNIT":
       return (
         <Suspense fallback={<UnitQuestionSessionSkeleton />}>
-          <UnitQuestionSession session={session} />
+          <UnitQuestionSession />
         </Suspense>
       );
     case "ALL":

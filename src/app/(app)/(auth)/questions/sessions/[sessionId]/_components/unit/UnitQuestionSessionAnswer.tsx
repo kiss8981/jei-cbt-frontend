@@ -4,18 +4,15 @@ import { QuestionMultipleChoice } from "@/components/ui/question/MultipleChoice"
 import { QuestionMultipleShort } from "@/components/ui/question/MultipleShort";
 import { QuestionShortAnswer } from "@/components/ui/question/ShortAnswer";
 import { QuestionTrueFalse } from "@/components/ui/question/TrueFalse";
-import { GetUnitQuestionSessionAppDto } from "@/lib/http/apis/dtos/app/question/get-question-session.app.dto";
-import { GetQuestionAppDtoUnion } from "@/lib/http/apis/dtos/app/question/get-question.app.dto";
 import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
+import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { motion } from "framer-motion";
 
-const UnitQuestionSessionAnswer = ({
-  question,
-  nextQuestion,
-}: {
-  question: GetQuestionAppDtoUnion;
-  nextQuestion: () => void;
-}) => {
+const UnitQuestionSessionAnswer = () => {
+  const { question: questionMap } = useQuestionSessionStore(state => state);
+  const question = questionMap?.question;
+  if (!question) return null;
+
   const renderContent = () => {
     switch (question.type) {
       case QuestionType.TRUE_FALSE:

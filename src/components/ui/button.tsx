@@ -57,27 +57,64 @@ function Button({
   );
 }
 
+type FixedButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    /** 내부 컨텐츠 최대 가로폭(px). 기본 600 */
+    maxWidth?: number;
+    /** 좌우 패딩(px). 기본 16 */
+    sidePadding?: number;
+    /** 버튼 위/아래 패딩(px). 기본 12 */
+    verticalPadding?: number;
+    /** 래퍼(div)의 className */
+    wrapperClassName?: string;
+  };
+
 function FixedButton({
   className,
   variant,
   size,
   asChild = false,
+  maxWidth = 600,
+  sidePadding = 16,
+  verticalPadding = 12,
+  wrapperClassName,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+}: FixedButtonProps) {
   const Comp = asChild ? Slot : "button";
 
   return (
-    <Comp
-      data-slot="button"
+    <div
       className={cn(
-        buttonVariants({ variant, size, className }),
-        "mt-auto w-full fixed bottom-0 left-0 right-0 m-4 max-w-[calc(100%-2rem)]"
+        "fixed bottom-0 left-0 right-0 z-50",
+        // 배경/블러가 필요 없으면 지워도 됨
+        "backdrop-blur-md bg-background/70",
+        wrapperClassName
       )}
-      {...props}
-    />
+      style={{
+        // 좌우 여백
+        paddingLeft: sidePadding,
+        paddingRight: sidePadding,
+        // 기본 + 안전영역 하단 여백
+        paddingTop: verticalPadding,
+        paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + ${verticalPadding}px)`,
+      }}
+    >
+      <div
+        className="mx-auto w-full"
+        style={{ maxWidth }} // 600px 초과 금지
+      >
+        <Comp
+          data-slot="button"
+          className={cn(
+            buttonVariants({ variant, size }),
+            "w-full", // 버튼은 꽉 차게
+            className
+          )}
+          {...props}
+        />
+      </div>
+    </div>
   );
 }
 

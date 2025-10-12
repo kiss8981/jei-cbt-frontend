@@ -2,8 +2,18 @@ import { Button } from "../button";
 import { Input } from "../input";
 import { Separator } from "../separator"; // Separator 추가
 import { useState } from "react";
+import SubmitButton from "./SubmitButton";
+import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
+import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 
 export const QuestionMultipleShort = ({ question }: { question: string }) => {
+  const {
+    question: questionMap,
+    isFirstQuestion,
+    previousQuestion,
+  } = useQuestionSessionStore(state => state);
+  const { submit, isLoading, ResultDialog } = useQuestionSessionAnswer();
+
   const placeholders = [...question.matchAll(/\{(\d+)\}/g)];
   const numInputs = placeholders.length;
 
@@ -19,9 +29,15 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("제출된 답변:", answers);
+
+    await submit({
+      answersForMultipleShortAnswer: answers.map((ans, idx) => ({
+        orderIndex: Number(idx),
+        content: ans.trim(),
+      })),
+    });
   };
 
   const renderQuestionWithInputs = () => {
@@ -76,30 +92,34 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
   };
 
   return (
-    // Card 대신 베이스 템플릿의 div 구조를 사용
-    <div className="p-4 bg-background max-w-xl mx-auto">
-      {/* 문제 제목 */}
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-        다음 빈칸에 알맞은 말을 넣으세요.
-      </h2>
+    <>
+      <ResultDialog />
 
-      <Separator className="mt-2 mb-3" />
+      <div className="bg-background mx-auto w-full">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          다음 빈칸에 알맞은 말을 넣으세요.
+        </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* 문제 영역: Textarea 대신 Input을 포함한 문제 텍스트를 렌더링 */}
-        <div
-          id="question-area"
-          // 문제 텍스트를 감싸는 영역에 깔끔한 스타일 적용
-          className="p-3 leading-relaxed text-lg border-l-4 border-l-muted-foreground/50 bg-muted/20 rounded-md flex flex-wrap items-center"
-        >
-          {renderQuestionWithInputs()}
-        </div>
+        <Separator className="mt-2 mb-3" />
 
-        {/* 제출 버튼 */}
-        <Button type="submit" className="w-full">
-          다음
-        </Button>
-      </form>
-    </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 문제 영역: Textarea 대신 Input을 포함한 문제 텍스트를 렌더링 */}
+          <div
+            id="question-area"
+            // 문제 텍스트를 감싸는 영역에 깔끔한 스타일 적용
+            className="p-3 leading-relaxed text-lg border-l-4 border-l-muted-foreground/50 bg-muted/20 rounded-md flex flex-wrap items-center"
+          >
+            {renderQuestionWithInputs()}
+          </div>
+
+          <SubmitButton
+            isFirst={isFirstQuestion}
+            onPrevious={previousQuestion}
+            disabledSubmit={answers.some(ans => ans.trim() === "")}
+            loadingSubmit={isLoading}
+          />
+        </form>
+      </div>
+    </>
   );
 };

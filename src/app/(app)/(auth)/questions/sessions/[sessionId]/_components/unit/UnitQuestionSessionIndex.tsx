@@ -1,25 +1,21 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { GetUnitQuestionSessionAppDto } from "@/lib/http/apis/dtos/app/question/get-question-session.app.dto";
+import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { formatHMS } from "@/utils/formatHMS";
 import { motion } from "framer-motion";
 import { BookOpen, Timer } from "lucide-react";
 
-const UnitQuestionSessionIndex = ({
-  session,
-  onClickStart,
-}: {
-  session: GetUnitQuestionSessionAppDto;
-  onClickStart: () => void;
-}) => {
+const UnitQuestionSessionIndex = () => {
+  const { session, nextQuestion } = useQuestionSessionStore(state => state);
+
+  if (!session || session.type !== "UNIT") return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="w-full flex h-full justify-center flex-col px-5 items-center"
+      className="w-full flex h-full justify-center flex-col px-5 items-center  min-h-[calc(100vh-12rem)]"
     >
       <div className="w-full flex flex-col h-full justify-center">
         <div className="flex flex-col items-center justify-between space-y-0 pb-2">
@@ -49,11 +45,11 @@ const UnitQuestionSessionIndex = ({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between mt-auto">
+          <div className="flex flex-col mt-auto">
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={onClickStart}
+                onClick={nextQuestion}
                 className="w-full"
               >
                 {session.lastQuestionMapId ? "이어하기" : "학습시작"}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthStoreProvider } from "@/lib/store/providers/auth.provider";
 import { cookies } from "next/headers";
 import { me } from "@/lib/http/apis/app/auth";
+import SafeArea from "@/components/SafeArea";
 
 export const metadata: Metadata = {
   title: "홈",
@@ -25,7 +26,7 @@ export default async function AppRootLayout({
         user: authMe?.data ?? null,
       }}
     >
-      {children}
+      <SafeArea>{children}</SafeArea>
     </AuthStoreProvider>
   );
 }

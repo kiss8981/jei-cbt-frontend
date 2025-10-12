@@ -3,6 +3,7 @@ import { SessionType } from "@/lib/http/apis/dtos/common/session-type.enum";
 import { cookies } from "next/headers";
 import QuestionSession from "./_components/QuestionSession";
 import { Suspense } from "react";
+import { QuestionSessionProvider } from "@/lib/store/providers/question-session.provider";
 export const generateMetadata = async ({
   params,
 }: {
@@ -53,9 +54,19 @@ const LearnUnitPage = async ({
   });
 
   return (
-    <div className="pt-14 pb-5 bg-white h-screen">
-      <QuestionSession session={session} />
-    </div>
+    <QuestionSessionProvider
+      initStore={{
+        session,
+        question: null,
+        isQuestionLoading: false,
+        isFirstQuestion: false,
+        hasMoreQuestions: true,
+      }}
+    >
+      <div className=" bg-white">
+        <QuestionSession session={session} />
+      </div>
+    </QuestionSessionProvider>
   );
 };
 

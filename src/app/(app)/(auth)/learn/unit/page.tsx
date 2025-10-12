@@ -7,7 +7,7 @@ export const metadata = {
 
 const LearnUnitPage = () => {
   return (
-    <div className="flex flex-col min-h-screen pt-14 pb-5 bg-white">
+    <div className="flex flex-col bg-white">
       <Suspense fallback={<UnitsLoadingSkeleton />}>
         <Units />
       </Suspense>

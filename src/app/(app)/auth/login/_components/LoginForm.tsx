@@ -46,7 +46,7 @@ export function LoginForm() {
 
       setUser(user.data);
 
-      navigate("reset", "/", "index");
+      navigate("reset", "/", "(tabs)");
     } catch (error: any) {
       console.log(error);
       toast.error(error.message || "로그인중 오류가 발생했습니다.");

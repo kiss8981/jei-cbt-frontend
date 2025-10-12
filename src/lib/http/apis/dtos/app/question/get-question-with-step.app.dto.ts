@@ -6,6 +6,12 @@ export class GetQuestionWithStepAppDto {
   isLastQuestion: boolean;
 
   @Expose()
+  previousQuestionCount: number | null;
+
+  @Expose()
+  nextQuestionCount: number | null;
+
+  @Expose()
   questionMapId: number;
 
   @Expose()
