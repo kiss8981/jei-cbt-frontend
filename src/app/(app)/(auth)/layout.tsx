@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { me } from "@/lib/http/apis/app/auth";
 import Login from "../_components/Login";
 
-export default async function AdminAuthLayout({
+export default async function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

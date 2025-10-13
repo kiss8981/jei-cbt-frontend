@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { me } from "@/lib/http/apis/app/auth";
+import { me } from "@/lib/http/apis/admin/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "../_components/sidebar/Sidebar";
 

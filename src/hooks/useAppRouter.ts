@@ -41,7 +41,9 @@ const useAppRouter = () => {
           return router.replace(path);
         case "reset":
           if (!path) throw new Error("path 설정 오류");
-          return router.replace(path);
+          router.replace(path);
+          router.refresh();
+          return;
         case "back":
           return router.back();
         case "forward":
