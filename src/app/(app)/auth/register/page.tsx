@@ -7,7 +7,7 @@ export const metadata = {
 
 const RegisterPage: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+    <div className="flex flex-col items-center justify-center min-h-[calc(90vh-10rem)] bg-white px-3 mx-auto w-full">
       <Suspense>
         <RegisterForm />
       </Suspense>

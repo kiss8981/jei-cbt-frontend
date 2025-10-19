@@ -2,7 +2,7 @@ import { My } from "./_components/My";
 
 export default function MyPage() {
   return (
-    <div className="min-h-screen bg-white pt-8">
+    <div className="h-full flex items-center justify-center w-full">
       <My />
     </div>
   );

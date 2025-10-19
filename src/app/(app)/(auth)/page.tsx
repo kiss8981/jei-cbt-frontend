@@ -7,7 +7,7 @@ import { toast } from "sonner";
 export default function Home() {
   const { navigate } = useAppRouter();
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] bg-white px-3 mx-auto w-full">
+    <div className="flex flex-col items-center justify-center min-h-[calc(90vh-10rem)] bg-white px-3 mx-auto w-full">
       <div className="flex flex-col items-center">
         <img
           src="/images/logo.png"

@@ -20,9 +20,11 @@ import useAppRouter from "@/hooks/useAppRouter";
 import { login, me } from "@/lib/http/apis/app/auth";
 import { useAuthStore } from "@/lib/store/providers/auth.provider";
 import { toast } from "sonner";
+import useWebview from "@/hooks/useWebview";
 
 export function LoginForm() {
   const { navigate } = useAppRouter();
+  const { event } = useWebview();
   const { setTokens, setUser, user } = useAuthStore(state => state);
 
   const form = useForm<LoginInput>({
@@ -41,7 +43,11 @@ export function LoginForm() {
       });
 
       setTokens(data.accessToken, data.refreshToken);
-
+      event("AUTH_EVENT", {
+        method: "LOGIN",
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
       const user = await me(data.accessToken);
 
       setUser(user.data);

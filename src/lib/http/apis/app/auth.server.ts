@@ -19,3 +19,9 @@ export const refreshToken = async () => {
 
   return response.data;
 };
+
+export const logout = async () => {
+  const cookie = await cookies();
+  cookie.delete("accessToken");
+  cookie.delete("refreshToken");
+};

@@ -8,17 +8,12 @@ import { useAuthStore } from "@/lib/store/providers/auth.provider";
 
 export function My() {
   // useAuthStore에서 필요한 상태와 함수를 가져옵니다.
-  const { user } = useAuthStore(state => state);
+  const { user, logout } = useAuthStore(state => state);
   const { navigate } = useAppRouter();
 
-  const handleLogout = () => {
-    // 1. 인증 상태 초기화
-    // 토큰과 사용자 정보를 null 또는 초기값으로 설정하여 로그아웃 처리
-    // setTokens({ accessToken: null, refreshToken: null });
-    // setUser(null); // 또는 setUser({ name: '', phone: '' }) 등 초기 상태로 설정
-    // // 2. 로그아웃 API 호출 (필요한 경우)
-    // // 💡 백엔드에 로그아웃 요청을 보내는 로직을 여기에 추가할 수 있습니다.
-    // console.log("로그아웃 시도 및 인증 상태 초기화 완료");
+  const handleLogout = async () => {
+    await logout();
+    navigate("reset", "/auth/login", "webview");
   };
 
   // user 객체가 없는 경우 (로그아웃 상태 등) 처리
@@ -61,6 +56,15 @@ export function My() {
             className="bg-gray-50 border-gray-200 cursor-default"
           />
         </div>
+
+        {/* 로그아웃 버튼 */}
+        <Button
+          variant="outline"
+          onClick={handleLogout}
+          className="w-full mt-6"
+        >
+          로그아웃
+        </Button>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ export default function SafeArea({ children, className }: Props) {
     <div
       className={cn(className, "max-w-[600px] mx-auto")}
       style={{
-        paddingTop: "calc(16px + env(safe-area-inset-top, 0px))",
+        paddingTop: "calc(env(safe-area-inset-top, 0px))",
         paddingBottom: "env(safe-area-inset-bottom)",
         paddingLeft: "env(safe-area-inset-left)",
         paddingRight: "env(safe-area-inset-right)",

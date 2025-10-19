@@ -1,3 +1,4 @@
+import { logout } from "@/lib/http/apis/app/auth.server";
 import { MeUserAuthAppDto } from "@/lib/http/apis/dtos/app/auth/me.auth.dto";
 import { http } from "@/lib/http/http";
 import { create, createStore, StoreApi } from "zustand";
@@ -11,6 +12,7 @@ export interface AuthState {
 interface AuthActions {
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: MeUserAuthAppDto | null) => void;
+  logout: () => void;
 }
 
 export const initialAuthState: AuthState = {
@@ -50,6 +52,15 @@ export const createAuthStore = (initState: AuthState = initialAuthState) => {
     },
     setUser: (user: MeUserAuthAppDto | null) => {
       set({ user });
+    },
+    logout: async () => {
+      set({
+        accessToken: null,
+        refreshToken: null,
+        user: null,
+      });
+      delete http.defaults.headers.common["Authorization"];
+      await logout();
     },
   })); // 3. 스토어가 생성될 때 인스턴스를 전역 변수에 저장합니다.
 
