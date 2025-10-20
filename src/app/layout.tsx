@@ -29,22 +29,6 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-        document.addEventListener('deviceready', () => {
-          var initialHeight = document.documentElement.clientHeight;
-          window.addEventListener('resize', getStatusBarHeight);
-          StatusBar.overlaysWebView(true);
-          function getStatusBarHeight() {
-              var currentHeight = document.documentElement.clientHeight;
-              document.documentElement.style.setProperty('--safe-area-top', (currentHeight - initialHeight) + 'px');
-              window.removeEventListener('resize', getStatusBarHeight);
-          }
-      }, false);
-        `,
-        }}
-      />
       <body
         className={`${nanumGothic.variable} ${nanumGothic.className} antialiased`}
       >

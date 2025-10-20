@@ -25,7 +25,6 @@ const TABLE_HEADERS = [
   "문제 이름",
   "능력단위",
   "등록일",
-  "수정",
 ] as const;
 
 const COLUMN_STYLES = [
@@ -34,7 +33,6 @@ const COLUMN_STYLES = [
   "bg-accent align-top w-24",
   "align-top w-24",
   "bg-accent align-top w-24",
-  "align-top w-24",
 ] as const;
 
 function TableHeaderRow() {
@@ -67,9 +65,6 @@ function LoadingTableBody() {
             <Skeleton className="h-4 w-24" />
           </TableCell>
           <TableCell className={COLUMN_STYLES[4]}>
-            <Skeleton className="h-4 w-24" />
-          </TableCell>
-          <TableCell className={COLUMN_STYLES[5]}>
             <Skeleton className="h-4 w-24" />
           </TableCell>
         </TableRow>
@@ -125,18 +120,17 @@ function ReviewTableRow({ item }: QuestionTableRowProps) {
     <TableRow key={item.id} className="h-24">
       <TableCell className={COLUMN_STYLES[0]}>{item.id}</TableCell>
       <TableCell className={COLUMN_STYLES[1]}>{typeText}</TableCell>
-      <TableCell className={COLUMN_STYLES[2]}>{item.title}</TableCell>
-      <TableCell className={COLUMN_STYLES[3]}>{item.unitName}</TableCell>
-      <TableCell className={COLUMN_STYLES[4]}>
-        {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
-      </TableCell>
-      <TableCell className={COLUMN_STYLES[5]}>
+      <TableCell className={COLUMN_STYLES[2]}>
         <Link
           href={`/admin/questions/${item.id}`}
           className="text-blue-600 hover:underline"
         >
-          수정
+          {item.title}
         </Link>
+      </TableCell>
+      <TableCell className={COLUMN_STYLES[3]}>{item.unitName}</TableCell>
+      <TableCell className={COLUMN_STYLES[4]}>
+        {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
       </TableCell>
     </TableRow>
   );

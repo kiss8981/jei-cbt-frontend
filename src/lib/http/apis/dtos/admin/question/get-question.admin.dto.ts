@@ -1,5 +1,6 @@
 import { Expose } from "class-transformer";
 import { QuestionType } from "../../common/question-type.enum";
+import { GetPhotoMappingAdminDto } from "../upload/get-photo-mapping.admin.dto";
 
 export class GetQuestionAdminDto {
   @Expose()
@@ -22,6 +23,9 @@ export class GetQuestionAdminDto {
 
   @Expose()
   createdAt: Date;
+
+  @Expose()
+  photos: GetPhotoMappingAdminDto[];
 }
 export type GetQuestionAdminUnionDto =
   | GetTrueFalseQuestionAdminDto

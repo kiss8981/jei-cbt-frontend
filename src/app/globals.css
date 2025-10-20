@@ -7,6 +7,11 @@
   --font-sans: var(--font-nanum-gothic), sans-serif;
 }
 
+:root {
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+}
+
 @layer utilities {
   .liquid-glass-overlay {
     /* 투명도 더 높임 (뒤가 보이도록) */
