@@ -21,14 +21,14 @@ export default function Home() {
           능력 단위별 학습
         </Button>
         <Button onClick={() => toast.error("준비중입니다.")} size="lg">
-          전체 문제 학습 (준비중)
+          전체 문제 학습
         </Button>
         <Button
           onClick={() => toast.error("준비중입니다.")}
           className="col-span-2"
           size="lg"
         >
-          모의고사 (준비중)
+          모의고사
         </Button>
       </div>
     </div>
