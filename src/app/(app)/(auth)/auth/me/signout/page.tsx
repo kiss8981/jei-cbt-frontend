@@ -1,5 +1,9 @@
 import SignoutButton from "./_components/SignoutButton";
 
+export const metadata = {
+  title: "회원 탈퇴",
+};
+
 export default function Signout() {
   return (
     <div className="h-full flex items-center justify-center w-full">
