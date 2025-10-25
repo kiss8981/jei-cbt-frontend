@@ -69,3 +69,13 @@ export const me = async (accessToken?: string) => {
   }
   return response.data;
 };
+
+export const signout = async () => {
+  const response = await http.post<BaseResponse<boolean>>("/auth/signout");
+
+  if (response.data.code !== 200) {
+    throw new Error(response.data.message || "회원 탈퇴에 실패했습니다.");
+  }
+
+  return response.data;
+};

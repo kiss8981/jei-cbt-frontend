@@ -8,7 +8,7 @@ import { useAuthStore } from "@/lib/store/providers/auth.provider";
 
 export function My() {
   // useAuthStore에서 필요한 상태와 함수를 가져옵니다.
-  const { user, logout } = useAuthStore(state => state);
+  const { user, logout } = useAuthStore((state) => state);
   const { navigate } = useAppRouter();
 
   const handleLogout = async () => {
@@ -65,6 +65,17 @@ export function My() {
         >
           로그아웃
         </Button>
+
+        <div className="w-full flex items-center">
+          <Button
+            id="signout"
+            variant="link"
+            className="underline mx-auto"
+            onClick={() => navigate("push", "/auth/me/signout")}
+          >
+            회원 탈퇴
+          </Button>
+        </div>
       </div>
     </div>
   );
