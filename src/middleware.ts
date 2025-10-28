@@ -43,7 +43,7 @@ export default async function middleware(req: NextRequest) {
   // 리프레시 토큰 없으면 로그인으로
   if (!refreshTokenValue) {
     const url = req.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/auth/login?ssr=1";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
@@ -75,7 +75,7 @@ export default async function middleware(req: NextRequest) {
     return res;
   } catch {
     // 리프레시 실패 → 쿠키 제거 후 로그인으로
-    const res = NextResponse.redirect(new URL("/login", req.url));
+    const res = NextResponse.redirect(new URL("/auth/login?ssr=1", req.url));
     res.cookies.delete("accessToken");
     res.cookies.delete("refreshToken");
     return res;

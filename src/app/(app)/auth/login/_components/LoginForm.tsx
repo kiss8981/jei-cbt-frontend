@@ -21,11 +21,15 @@ import { login, me } from "@/lib/http/apis/app/auth";
 import { useAuthStore } from "@/lib/store/providers/auth.provider";
 import { toast } from "sonner";
 import useWebview from "@/hooks/useWebview";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import Login from "@/app/(app)/_components/Login";
 
 export function LoginForm() {
   const { navigate } = useAppRouter();
   const { event } = useWebview();
-  const { setTokens, setUser, user } = useAuthStore(state => state);
+  const { setTokens, setUser, user } = useAuthStore((state) => state);
+  const searchParams = useSearchParams();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -34,6 +38,13 @@ export function LoginForm() {
       password: "",
     },
   });
+
+  useEffect(() => {
+    const ssr = searchParams.get("ssr");
+    if (ssr == "1") {
+      navigate("reset", "/auth/login");
+    }
+  }, [searchParams, navigate]);
 
   async function onSubmit(values: LoginInput) {
     try {
