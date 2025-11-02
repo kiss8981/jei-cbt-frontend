@@ -26,6 +26,13 @@ export default async function AppRootLayout({
         user: authMe?.data ?? null,
       }}
     >
+      <div
+        dangerouslySetInnerHTML={{
+          __html: `
+        `,
+        }}
+      ></div>
+
       <SafeArea>{children}</SafeArea>
     </AuthStoreProvider>
   );

@@ -1,7 +1,8 @@
 import { GetQuestionSessionAppDtoUnion } from "@/lib/http/apis/dtos/app/question/get-question-session.app.dto";
 import UnitQuestionSession from "./unit/UnitQuestionSession";
 import { Suspense } from "react";
-import { UnitQuestionSessionSkeleton } from "./unit/UnitQuestionSessionSkeleton";
+import { QuestionSessionSkeleton } from "./QuestionSessionSkeleton";
+import AllQuestionSession from "./all/AllQuestionSession";
 
 const QuestionSession = ({
   session,
@@ -11,12 +12,16 @@ const QuestionSession = ({
   switch (session.type) {
     case "UNIT":
       return (
-        <Suspense fallback={<UnitQuestionSessionSkeleton />}>
+        <Suspense fallback={<QuestionSessionSkeleton />}>
           <UnitQuestionSession />
         </Suspense>
       );
     case "ALL":
-      return <></>;
+      return (
+        <Suspense fallback={<QuestionSessionSkeleton />}>
+          <AllQuestionSession />
+        </Suspense>
+      );
     case "MOCK":
       return <></>;
   }

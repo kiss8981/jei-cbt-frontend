@@ -5,6 +5,7 @@ import { useState } from "react";
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
+import ResultDialog from "./ResultDialog";
 
 export const QuestionMultipleShort = ({ question }: { question: string }) => {
   const {
@@ -12,7 +13,8 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
     isFirstQuestion,
     previousQuestion,
   } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, ResultDialog } = useQuestionSessionAnswer();
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    useQuestionSessionAnswer();
 
   const placeholders = [...question.matchAll(/\{(\d+)\}/g)];
   const numInputs = placeholders.length;
@@ -93,8 +95,11 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
 
   return (
     <>
-      <ResultDialog />
-
+      <ResultDialog
+        result={result}
+        isResultOpen={isResultOpen}
+        setIsResultOpen={setIsResultOpen}
+      />
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
           다음 빈칸에 알맞은 말을 넣으세요.

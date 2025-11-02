@@ -8,7 +8,7 @@ import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { motion } from "framer-motion";
 
-const UnitQuestionSessionAnswer = () => {
+const QuestionSessionAnswer = () => {
   const { question: questionMap } = useQuestionSessionStore(state => state);
   const question = questionMap?.question;
   if (!question) return null;
@@ -66,4 +66,4 @@ const UnitQuestionSessionAnswer = () => {
   );
 };
 
-export default UnitQuestionSessionAnswer;
+export default QuestionSessionAnswer;

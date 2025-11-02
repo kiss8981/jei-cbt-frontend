@@ -16,9 +16,10 @@ const SubmitButton = ({
 }) => {
   return (
     <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50
-    w-[calc(100vw-2rem)] max-w-[600px]
-    pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-[600px] pt-3"
+      style={{
+        paddingBottom: `calc(var(--safe-area-inset-bottom, 0px) + 12px)`,
+      }}
     >
       <div className={`grid ${isFirst ? "grid-cols-1" : "grid-cols-2"} gap-3`}>
         {!isFirst && (

@@ -5,6 +5,7 @@ import { useState } from "react";
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
+import ResultDialog from "./ResultDialog";
 
 export const QuestionShortAnswer = ({ question }: { question: string }) => {
   const {
@@ -12,7 +13,8 @@ export const QuestionShortAnswer = ({ question }: { question: string }) => {
     isFirstQuestion,
     previousQuestion,
   } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, ResultDialog } = useQuestionSessionAnswer();
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    useQuestionSessionAnswer();
 
   const [answer, setAnswer] = useState("");
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +27,11 @@ export const QuestionShortAnswer = ({ question }: { question: string }) => {
 
   return (
     <>
-      <ResultDialog />
+      <ResultDialog
+        result={result}
+        isResultOpen={isResultOpen}
+        setIsResultOpen={setIsResultOpen}
+      />
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
           {question}

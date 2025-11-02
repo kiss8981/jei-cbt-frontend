@@ -8,8 +8,11 @@ import { GetUnitListAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list.a
 import { useUnits } from "@/app/(app)/_hooks/useUnits";
 import { GetUnitListQueryAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list-query.app.dto";
 import useAppRouter from "@/hooks/useAppRouter";
-import { useQuestionSessionByUnitId } from "@/app/(app)/_hooks/useQuestionSession";
-import { Button, FixedButton } from "@/components/ui/button";
+import {
+  useQuestionSessionByAll,
+  useQuestionSessionByUnitId,
+} from "@/app/(app)/_hooks/useQuestionSession";
+import { Button, FixedButton, TwoFixedButton } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
@@ -75,9 +78,9 @@ const Units = () => {
   });
   const [hasMore, setHasMore] = useState(true);
   const { units, totalCount, isLoading, error } = useUnits(searchParams);
-  const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
+  const [selectedUnitIds, setSelectedUnitIds] = useState<number[]>([]);
   const { handleCreate, isLoading: isCreateSessionLoading } =
-    useQuestionSessionByUnitId(selectedUnitId!);
+    useQuestionSessionByAll(selectedUnitIds);
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -122,8 +125,16 @@ const Units = () => {
           <UnitItem
             key={unit.id}
             unit={unit}
-            handleSelect={setSelectedUnitId}
-            selected={selectedUnitId == unit.id}
+            handleSelect={(unitId: number) => {
+              setSelectedUnitIds(prevSelected => {
+                if (prevSelected.includes(unitId)) {
+                  return prevSelected.filter(id => id !== unitId);
+                } else {
+                  return [...prevSelected, unitId];
+                }
+              });
+            }}
+            selected={selectedUnitIds.includes(unit.id)}
           />
         ))}
 
@@ -157,18 +168,32 @@ const Units = () => {
         )}
       </div>
 
-      <FixedButton
-        size="lg"
-        disabled={!selectedUnitId || isCreateSessionLoading}
-        onClick={async () => {
-          if (selectedUnitId) {
-            await handleCreate();
-          }
+      <TwoFixedButton
+        left={{
+          children: selectedUnitIds.length > 0 ? `전체 선택 해제` : "전체 선택",
+          props: {
+            variant: "outline",
+            onClick: () => {
+              if (selectedUnitIds.length > 0) {
+                setSelectedUnitIds([]);
+              } else {
+                setSelectedUnitIds(allUnits.map(unit => unit.id));
+              }
+            },
+          },
         }}
-        data-testid="start-quiz-button"
-      >
-        {isCreateSessionLoading ? <Spinner /> : "시작"}
-      </FixedButton>
+        right={{
+          children: isCreateSessionLoading ? (
+            <Spinner className="w-5 h-5" />
+          ) : (
+            "시작"
+          ),
+          props: {
+            onClick: () => handleCreate(),
+            disabled: selectedUnitIds.length === 0 || isCreateSessionLoading,
+          },
+        }}
+      />
     </div>
   );
 };

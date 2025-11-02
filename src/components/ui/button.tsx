@@ -97,7 +97,7 @@ function FixedButton({
         paddingRight: sidePadding,
         // 기본 + 안전영역 하단 여백
         paddingTop: verticalPadding,
-        paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + ${verticalPadding}px)`,
+        paddingBottom: `calc(var(--safe-area-inset-bottom, 0px) + ${verticalPadding}px)`,
       }}
     >
       <div
@@ -118,4 +118,47 @@ function FixedButton({
   );
 }
 
-export { Button, buttonVariants, FixedButton };
+function TwoFixedButton({
+  left,
+  right,
+}: {
+  left: {
+    children: React.ReactNode;
+    props?: React.ComponentProps<"button"> &
+      VariantProps<typeof buttonVariants> & {
+        asChild?: boolean;
+      };
+  };
+  right: {
+    children: React.ReactNode;
+    props?: React.ComponentProps<"button"> &
+      VariantProps<typeof buttonVariants> & {
+        asChild?: boolean;
+      };
+  };
+}) {
+  return (
+    <div
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50
+w-[calc(100vw-2rem)] max-w-[600px]
+pt-3 pb-[calc(1rem+var(--safe-area-inset-bottom))]"
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <Button
+          {...left.props}
+          className={cn(left?.props?.className, "w-full")}
+        >
+          {left.children}
+        </Button>
+        <Button
+          {...right.props}
+          className={cn(right?.props?.className, "w-full")}
+        >
+          {right.children}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export { Button, buttonVariants, FixedButton, TwoFixedButton };

@@ -5,10 +5,10 @@ import { formatHMS } from "@/utils/formatHMS";
 import { motion } from "framer-motion";
 import { BookOpen, Timer } from "lucide-react";
 
-const UnitQuestionSessionIndex = () => {
+const AllQuestionSessionIndex = () => {
   const { session, nextQuestion } = useQuestionSessionStore(state => state);
 
-  if (!session || session.type !== "UNIT") return null;
+  if (!session || session.type !== "ALL") return null;
 
   return (
     <motion.div
@@ -20,22 +20,21 @@ const UnitQuestionSessionIndex = () => {
       <div className="w-full flex flex-col h-full justify-center">
         <div className="flex flex-col items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            <div className="text-lg font-semibold">{session.unitName}</div>
+            <BookOpen className="h-5 w-5" /> 전체 문제 학습
           </div>
           <Badge variant="secondary" className="mt-2">
-            능력 단위별 학습
+            전체 문제 학습
           </Badge>
         </div>
         <div className="space-y-3 mt-22">
           <div className="flex flex-row gap-4 text-sm justify-between">
             <div className="flex flex-col">
               <span className="text-muted-foreground">유형</span>
-              <span className="font-medium">능력 단위별 학습</span>
+              <span className="font-medium">전체 문체 학습</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground">총 문항</span>
-              <span className="font-medium">{session.totalQuestions}</span>
+              <span className="font-medium">무제한</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground">진행시간</span>
@@ -69,4 +68,4 @@ const UnitQuestionSessionIndex = () => {
   );
 };
 
-export default UnitQuestionSessionIndex;
+export default AllQuestionSessionIndex;

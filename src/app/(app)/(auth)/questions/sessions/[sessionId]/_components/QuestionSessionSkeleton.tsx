@@ -1,4 +1,4 @@
-export function UnitQuestionSessionSkeleton() {
+export function QuestionSessionSkeleton() {
   return (
     <div className="w-full flex h-full justify-center flex-col px-5 items-center">
       <div className="w-full flex flex-col h-full justify-center">

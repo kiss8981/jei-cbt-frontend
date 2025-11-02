@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { http, BaseResponse } from "@/lib/http/http";
 import useAppRouter from "@/hooks/useAppRouter";
 import { toast } from "sonner";
-import { GetUnitQuestionSessionAppDto } from "@/lib/http/apis/dtos/app/question/get-question-session.app.dto";
+import {
+  GetQuestionSessionAppDtoUnion,
+  GetUnitQuestionSessionAppDto,
+} from "@/lib/http/apis/dtos/app/question/get-question-session.app.dto";
 import { GetQuestionWithStepAppDto } from "@/lib/http/apis/dtos/app/question/get-question-with-step.app.dto";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { SubmissionAnswerRequestAppDto } from "@/lib/http/apis/dtos/app/question/submission-answer-request.app.dto";
@@ -50,6 +53,107 @@ export const useQuestionSessionByUnitId = (unitId: number) => {
       startTransition(() => {
         navigate("push", `/questions/sessions/${data.data.id}`);
       });
+
+      return data;
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    handleCreate,
+  };
+};
+
+export const useLastQuestionSession = () => {
+  const [lastSession, setLastSession] =
+    useState<GetQuestionSessionAppDtoUnion | null>(null);
+  const { navigate } = useAppRouter();
+
+  useEffect(() => {
+    fetchLastSession();
+  }, []);
+
+  const LastSessionDialog = () => {
+    return (
+      <Dialog open={!!lastSession} onOpenChange={() => setLastSession(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-green-600">
+              마지막으로 풀던 문제가 있습니다 🎉
+            </DialogTitle>
+            <DialogDescription>이어서 풀어보시겠어요?</DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="gap-2 sm:gap-3 grid grid-cols-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setLastSession(null);
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              onClick={() => {
+                navigate("push", `/questions/sessions/${lastSession?.id}`);
+              }}
+            >
+              이어서 풀기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const fetchLastSession = async () => {
+    try {
+      const { data } = await http.get<
+        BaseResponse<GetQuestionSessionAppDtoUnion>
+      >(`/questions/sessions/latest`);
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "마지막 문제 세션 불러오기에 실패했습니다."
+        );
+      }
+
+      setLastSession(data.data);
+
+      return data;
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  return {
+    lastSession,
+    LastSessionDialog,
+  };
+};
+
+export const useQuestionSessionByAll = (unidIds: number[]) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { navigate } = useAppRouter();
+
+  const handleCreate = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await http.post<
+        BaseResponse<GetUnitQuestionSessionAppDto>
+      >(`/questions/sessions/by-all`, {
+        unitIds: unidIds.map(id => Number(id)),
+      });
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "문제 세션 생성에 실패했습니다.");
+      }
+
+      navigate("push", `/questions/sessions/${data.data.id}`);
 
       return data;
     } catch (error: any) {
@@ -160,7 +264,6 @@ export const useQuestionSession = (sessionId: number) => {
 };
 
 export const useQuestionSessionAnswer = () => {
-  const { navigate } = useAppRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {
     question: questionMap,
@@ -174,11 +277,6 @@ export const useQuestionSessionAnswer = () => {
   const [result, setResult] = useState<SubmissionAnswerResponseAppDto | null>(
     null
   );
-
-  const handleNext = async () => {
-    setIsResultOpen(false);
-    nextQuestion();
-  };
 
   const submit = async (payload: SubmissionAnswerRequestAppDto) => {
     try {
@@ -215,78 +313,11 @@ export const useQuestionSessionAnswer = () => {
     }
   };
 
-  const ResultDialog = () => {
-    const correct = result?.isCorrect ?? false;
-
-    return (
-      <Dialog open={isResultOpen} onOpenChange={setIsResultOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle
-              className={correct ? "text-green-600" : "text-red-600"}
-            >
-              {correct ? "정답입니다 🎉" : "오답입니다 😥"}
-            </DialogTitle>
-            <DialogDescription>
-              {correct
-                ? "잘하셨어요! 아래 해설을 확인해보세요."
-                : "아쉽지만, 다음 기회에 도전해보세요!"}
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* 정오표 및 해설 블록 */}
-          <div className="space-y-4">
-            {result?.answer && (
-              <div className="rounded-xl border p-3 text-sm">
-                {result?.answer && (
-                  <>
-                    <div className="items-start justify-between flex flex-col">
-                      <span className="text-muted-foreground">정답</span>
-                      <span className="font-semibold mt-1 break-keep">
-                        {result.answer}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {result?.explanation && (
-              <div className="rounded-xl bg-muted p-4 text-sm leading-relaxed">
-                <div className="font-semibold mb-1">해설</div>
-                <p className="whitespace-pre-wrap">{result.explanation}</p>
-              </div>
-            )}
-          </div>
-
-          {!hasMoreQuestions && (
-            <div className="text-sm text-muted-foreground text-center mt-2">
-              마지막 문제입니다. 첫 화면으로 돌아갑니다.
-            </div>
-          )}
-
-          <DialogFooter className="gap-2 sm:gap-3">
-            {!hasMoreQuestions ? (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  navigate("reset", "/", "(tabs)");
-                }}
-              >
-                홈으로 돌아가기
-              </Button>
-            ) : (
-              <Button onClick={handleNext}>다음 문제</Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  };
-
   return {
     isLoading,
     submit,
-    ResultDialog,
+    result,
+    isResultOpen,
+    setIsResultOpen,
   };
 };

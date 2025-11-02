@@ -37,7 +37,7 @@ export default async function RootLayout({
           position="bottom-center"
           offset={10}
           mobileOffset={{
-            bottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
+            bottom: "calc(10px + var(--safe-area-inset-bottom, 0px))",
           }}
         />
       </body>

@@ -4,6 +4,7 @@ import { Switch } from "../switch";
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
+import ResultDialog from "./ResultDialog";
 
 export const QuestionTrueFalse = ({ question }: { question: string }) => {
   const {
@@ -11,7 +12,8 @@ export const QuestionTrueFalse = ({ question }: { question: string }) => {
     isFirstQuestion,
     previousQuestion,
   } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, ResultDialog } = useQuestionSessionAnswer();
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    useQuestionSessionAnswer();
 
   const [checked, setChecked] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +26,11 @@ export const QuestionTrueFalse = ({ question }: { question: string }) => {
 
   return (
     <>
-      <ResultDialog />
+      <ResultDialog
+        result={result}
+        isResultOpen={isResultOpen}
+        setIsResultOpen={setIsResultOpen}
+      />
 
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">

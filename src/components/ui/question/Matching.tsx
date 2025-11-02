@@ -11,6 +11,7 @@ import { useState } from "react"; // 상태 관리를 위해 useState 추가
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
+import ResultDialog from "./ResultDialog";
 
 interface MatchingItem {
   id: number;
@@ -33,7 +34,8 @@ export const QuestionMatching = ({
     isFirstQuestion,
     previousQuestion,
   } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, ResultDialog } = useQuestionSessionAnswer();
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    useQuestionSessionAnswer();
 
   const [selections, setSelections] = useState<{ [key: number]: number }>({});
 
@@ -61,7 +63,11 @@ export const QuestionMatching = ({
 
   return (
     <>
-      <ResultDialog />
+      <ResultDialog
+        result={result}
+        isResultOpen={isResultOpen}
+        setIsResultOpen={setIsResultOpen}
+      />
 
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">

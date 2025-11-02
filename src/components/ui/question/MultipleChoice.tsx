@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
+import ResultDialog from "./ResultDialog";
 
 // 옵션 타입
 interface OptionItem {
@@ -34,7 +35,8 @@ export const QuestionMultipleChoice = ({
     isFirstQuestion,
     previousQuestion,
   } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, ResultDialog } = useQuestionSessionAnswer();
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    useQuestionSessionAnswer();
 
   const [singleSelection, setSingleSelection] = useState<number | null>(null); // 단일 선택 상태
   const [multipleSelections, setMultipleSelections] = useState<number[]>([]); // 복수 선택 상태
@@ -72,7 +74,11 @@ export const QuestionMultipleChoice = ({
 
   return (
     <>
-      <ResultDialog />
+      <ResultDialog
+        result={result}
+        isResultOpen={isResultOpen}
+        setIsResultOpen={setIsResultOpen}
+      />
 
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">

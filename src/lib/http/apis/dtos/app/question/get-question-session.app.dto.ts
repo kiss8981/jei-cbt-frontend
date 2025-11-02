@@ -11,7 +11,7 @@ export class GetQuestionSessionAppDto {
   id: number;
 
   @Expose()
-  duration: number; // 세션 시간 (초 단위)
+  durationMs: number; // 세션 시간 (ms 단위)
 
   @Expose()
   startedAt: Date; // 세션 시작 시간
@@ -42,4 +42,7 @@ export class GetMockQuestionSessionAppDto extends GetQuestionSessionAppDto {
 export class GetAllQuestionSessionAppDto extends GetQuestionSessionAppDto {
   @Expose()
   type: SessionType.ALL;
+
+  @Expose()
+  lastQuestionMapId: number | null; // 사용자가 마지막으로 푼 문제의 ID (없을 경우 null)
 }

@@ -1,27 +1,26 @@
 "use client";
 
-import UnitQuestionSessionIndex from "./UnitQuestionSessionIndex";
 import { AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/ui/spinner";
-import UnitQuestionSessionAnswer from "../QuestionSessionAnswer";
+import QuestionSessionAnswer from "../QuestionSessionAnswer";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
+import AllQuestionSessionIndex from "./AllQuestionSessionIndex";
 import { useSessionSegment } from "@/app/(app)/_hooks/useQuestionSessionSegment";
 import { useEffect } from "react";
 import { formatHMS } from "@/utils/formatHMS";
 import { FixedElapsedTime } from "@/components/ui/question/FixedElapsedTime";
 
-const UnitQuestionSession = () => {
+const AllQuestionSession = () => {
   const { isQuestionLoading, question, session } = useQuestionSessionStore(
     state => state
   );
-
   const { start, stop, isRunning, elapsedMs } = useSessionSegment(session.id);
 
   useEffect(() => {
     if (question && !isRunning) {
       start();
     }
-  }, [question]);
+  }, []);
 
   const renderContent = () => {
     if (isQuestionLoading) {
@@ -31,9 +30,9 @@ const UnitQuestionSession = () => {
         </div>
       );
     } else if (!question) {
-      return <UnitQuestionSessionIndex />;
+      return <AllQuestionSessionIndex />;
     } else {
-      return <UnitQuestionSessionAnswer />;
+      return <QuestionSessionAnswer />;
     }
   };
 
@@ -45,4 +44,4 @@ const UnitQuestionSession = () => {
   );
 };
 
-export default UnitQuestionSession;
+export default AllQuestionSession;

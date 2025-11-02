@@ -13,7 +13,7 @@ export interface QuestionSessionState {
 }
 
 interface QuestionSessionActions {
-  nextQuestion: () => Promise<void>;
+  nextQuestion: (initialLastQuestionMapId?: number) => Promise<void>;
   previousQuestion: () => Promise<void>;
 }
 
@@ -40,14 +40,14 @@ export const createQuestionSessionStore = (
 ) => {
   return createStore<QuestionSessionStore>((set, get) => ({
     ...initState,
-
-    nextQuestion: async () => {
+    nextQuestion: async (initialLastQuestionMapId?: number) => {
       try {
         set({ isQuestionLoading: true });
 
         const { session, question } = get();
-
-        const suffix = buildQuery(question?.questionMapId);
+        const suffix = buildQuery(
+          initialLastQuestionMapId ?? question?.questionMapId
+        );
         const { data } = await http.get<
           BaseResponse<GetQuestionWithStepAppDto>
         >(`/questions/sessions/${session.id}/next${suffix}`);
