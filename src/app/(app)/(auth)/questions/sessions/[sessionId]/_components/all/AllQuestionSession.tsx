@@ -7,20 +7,19 @@ import { useQuestionSessionStore } from "@/lib/store/providers/question-session.
 import AllQuestionSessionIndex from "./AllQuestionSessionIndex";
 import { useSessionSegment } from "@/app/(app)/_hooks/useQuestionSessionSegment";
 import { useEffect } from "react";
-import { formatHMS } from "@/utils/formatHMS";
 import { FixedElapsedTime } from "@/components/ui/question/FixedElapsedTime";
 
 const AllQuestionSession = () => {
   const { isQuestionLoading, question, session } = useQuestionSessionStore(
     state => state
   );
-  const { start, stop, isRunning, elapsedMs } = useSessionSegment(session.id);
+  const { start, isRunning, elapsedMs } = useSessionSegment(session.id);
 
   useEffect(() => {
     if (question && !isRunning) {
       start();
     }
-  }, []);
+  }, [question]);
 
   const renderContent = () => {
     if (isQuestionLoading) {

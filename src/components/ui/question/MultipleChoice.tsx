@@ -8,6 +8,8 @@ import SubmitButton from "./SubmitButton";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import ResultDialog from "./ResultDialog";
+import BottomKeypad from "./BottomKeypad";
+import { MultipleChoiceSegment } from "./MultipleChoiceSegment";
 
 // 옵션 타입
 interface OptionItem {
@@ -156,6 +158,34 @@ export const QuestionMultipleChoice = ({
             loadingSubmit={isLoading}
           />
         </form>
+
+        {!isMultiple && (
+          <BottomKeypad>
+            <MultipleChoiceSegment
+              multiple={isMultiple}
+              maxSelected={isMultiple ? options.length : 1}
+              values={options.map((item, idx) => idx + 1)}
+              value={
+                options.findIndex(
+                  item => item.id === (singleSelection as number)
+                ) + 1
+              }
+              valuesControlled={multipleSelections}
+              onChange={idx => {
+                if (isMultiple) {
+                  const selectedIdxes = idx as number[];
+                  const selectedIds = selectedIdxes.map(i => options[i - 1].id);
+                  alert(`선택된 항목 IDs: ${selectedIds.join(", ")}`);
+
+                  setMultipleSelections(selectedIds);
+                } else {
+                  handleSingleSelect(options[(idx as number) - 1].id);
+                }
+              }}
+              disabled={isLoading}
+            />
+          </BottomKeypad>
+        )}
       </div>
     </>
   );

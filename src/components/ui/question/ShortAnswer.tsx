@@ -1,7 +1,7 @@
 import { Button } from "../button";
 import { Separator } from "../separator"; // Separator 추가
 import { Input } from "../input";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
@@ -15,6 +15,17 @@ export const QuestionShortAnswer = ({ question }: { question: string }) => {
   } = useQuestionSessionStore(state => state);
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
     useQuestionSessionAnswer();
+  const input = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (input.current) {
+      input.current.focus();
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [input]);
 
   const [answer, setAnswer] = useState("");
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +54,7 @@ export const QuestionShortAnswer = ({ question }: { question: string }) => {
           {/* 2. 답변 입력 영역 */}
           <div className="grid w-full gap-1.5">
             <Input
+              ref={input}
               type="text"
               id="answer-input"
               className="text-base"

@@ -5,6 +5,8 @@ import SubmitButton from "./SubmitButton";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import ResultDialog from "./ResultDialog";
+import BottomKeypad from "./BottomKeypad";
+import { YesNoSegment } from "./TrueFalseSegment";
 
 export const QuestionTrueFalse = ({ question }: { question: string }) => {
   const {
@@ -58,6 +60,14 @@ export const QuestionTrueFalse = ({ question }: { question: string }) => {
             loadingSubmit={isLoading}
           />
         </form>
+
+        <BottomKeypad>
+          <YesNoSegment
+            value={checked}
+            onChange={setChecked}
+            disabled={isLoading}
+          />
+        </BottomKeypad>
       </div>
     </>
   );

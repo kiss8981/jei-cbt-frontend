@@ -7,15 +7,13 @@ import UnitQuestionSessionAnswer from "../QuestionSessionAnswer";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useSessionSegment } from "@/app/(app)/_hooks/useQuestionSessionSegment";
 import { useEffect } from "react";
-import { formatHMS } from "@/utils/formatHMS";
 import { FixedElapsedTime } from "@/components/ui/question/FixedElapsedTime";
 
 const UnitQuestionSession = () => {
   const { isQuestionLoading, question, session } = useQuestionSessionStore(
     state => state
   );
-
-  const { start, stop, isRunning, elapsedMs } = useSessionSegment(session.id);
+  const { start, isRunning, elapsedMs } = useSessionSegment(session.id);
 
   useEffect(() => {
     if (question && !isRunning) {
