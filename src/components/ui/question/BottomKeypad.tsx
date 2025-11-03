@@ -1,8 +1,7 @@
-// components/questions/BottomKeypad.tsx
 import { PropsWithChildren } from "react";
 import { cn } from "@/lib/utils"; // 있으면 사용, 없으면 classNames 대체하세요.
 
-export default function BottomKeypad({ children }: PropsWithChildren<{}>) {
+export default function BottomKeypad({ children }: PropsWithChildren) {
   return (
     <div
       className={cn("fixed inset-x-0 bottom-0 z-40")}
