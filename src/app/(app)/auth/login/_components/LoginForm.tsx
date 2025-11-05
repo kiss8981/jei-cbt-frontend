@@ -28,7 +28,7 @@ import Login from "@/app/(app)/_components/Login";
 export function LoginForm() {
   const { navigate } = useAppRouter();
   const { event } = useWebview();
-  const { setTokens, setUser, user } = useAuthStore((state) => state);
+  const { setTokens, setUser, user } = useAuthStore(state => state);
   const searchParams = useSearchParams();
 
   const form = useForm<LoginInput>({
@@ -111,6 +111,16 @@ export function LoginForm() {
                   />
                 </FormControl>
                 <FormMessage />
+                <Button
+                  variant="link"
+                  type="button"
+                  onClick={() => {
+                    navigate("push", "/auth/reset-password");
+                  }}
+                  className="text-sm px-0 ml-auto underline"
+                >
+                  비밀번호를 잊으셨나요?
+                </Button>
               </FormItem>
             )}
           />
