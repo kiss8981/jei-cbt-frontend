@@ -111,7 +111,7 @@ export function LoginForm() {
                   />
                 </FormControl>
                 <FormMessage />
-                <Button
+                {/* <Button
                   variant="link"
                   type="button"
                   onClick={() => {
@@ -120,7 +120,7 @@ export function LoginForm() {
                   className="text-sm px-0 ml-auto underline"
                 >
                   비밀번호를 잊으셨나요?
-                </Button>
+                </Button> */}
               </FormItem>
             )}
           />

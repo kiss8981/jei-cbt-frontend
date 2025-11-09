@@ -7,7 +7,13 @@ import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession"
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import ResultDialog from "./ResultDialog";
 
-export const QuestionShortAnswer = ({ question }: { question: string }) => {
+export const QuestionShortAnswer = ({
+  question,
+  initialUserAnswer,
+}: {
+  question: string;
+  initialUserAnswer?: string;
+}) => {
   const {
     question: questionMap,
     isFirstQuestion,
@@ -27,7 +33,7 @@ export const QuestionShortAnswer = ({ question }: { question: string }) => {
     }
   }, [input]);
 
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState(initialUserAnswer || "");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

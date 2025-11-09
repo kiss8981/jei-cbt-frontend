@@ -169,6 +169,40 @@ export const useQuestionSessionByAll = (unidIds: number[]) => {
   };
 };
 
+export const useQuestionSessionByMock = (unidIds: number[]) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { navigate } = useAppRouter();
+
+  const handleCreate = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await http.post<
+        BaseResponse<GetUnitQuestionSessionAppDto>
+      >(`/questions/sessions/by-mock`, {
+        type: "UNIT",
+        unitIds: unidIds.map(id => Number(id)),
+      });
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "문제 세션 생성에 실패했습니다.");
+      }
+
+      navigate("push", `/questions/sessions/${data.data.id}`);
+
+      return data;
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    handleCreate,
+  };
+};
+
 export const useQuestionSession = (sessionId: number) => {
   const [isLoading, setIsLoading] = useState(false);
   const [question, setQuestion] = useState<GetQuestionWithStepAppDto | null>(
