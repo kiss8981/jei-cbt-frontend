@@ -1,13 +1,9 @@
-// components/questions/BottomKeypad.tsx
 import { PropsWithChildren } from "react";
 import { cn } from "@/lib/utils"; // 있으면 사용, 없으면 classNames 대체하세요.
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 
-export default function BottomKeypad({ children }: PropsWithChildren<{}>) {
-  const { question: questionMap, session } = useQuestionSessionStore(
-    state => state
-  );
-
+export default function BottomKeypad({ children }: PropsWithChildren) {
+  const { session } = useQuestionSessionStore(state => state);
   return (
     <div
       className={cn("fixed inset-x-0 bottom-0 z-40")}
