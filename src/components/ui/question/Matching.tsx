@@ -12,6 +12,7 @@ import SubmitButton from "./SubmitButton";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import ResultDialog from "./ResultDialog";
+import { SubmissionAnswersForMatchingAppDto } from "@/lib/http/apis/dtos/app/question/submission-answer-request.app.dto";
 
 interface MatchingItem {
   id: number;
@@ -22,12 +23,15 @@ interface QuestionMatchingProps {
   question: string; // 문제의 설명
   leftItems: MatchingItem[]; // 왼쪽 항목 (연결 대상)
   rightItems: MatchingItem[]; // 오른쪽 항목 (선택 옵션)
+  // {"answersForMatching": [{"leftItemId": 1289, "rightItemId": 1292}, {"leftItemId": 1291, "rightItemId": 1290}, {"leftItemId": 1293, "rightItemId": 1292}]}
+  initialUserAnswer?: SubmissionAnswersForMatchingAppDto[]; // 초기 사용자 답변 (선택 사항)
 }
 
 export const QuestionMatching = ({
   question = "다음 항목들을 바르게 연결하시오.", // 기본값 설정
   leftItems,
   rightItems,
+  initialUserAnswer,
 }: QuestionMatchingProps) => {
   const {
     question: questionMap,
@@ -37,7 +41,17 @@ export const QuestionMatching = ({
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
     useQuestionSessionAnswer();
 
-  const [selections, setSelections] = useState<{ [key: number]: number }>({});
+  const [selections, setSelections] = useState<{ [key: number]: number }>(
+    () => {
+      const initialSelections: { [key: number]: number } = {};
+      if (initialUserAnswer) {
+        initialUserAnswer.forEach(answer => {
+          initialSelections[answer.leftItemId] = answer.rightItemId;
+        });
+      }
+      return initialSelections;
+    }
+  );
 
   const handleSelectChange = (itemId: number, value: number) => {
     setSelections(prev => ({

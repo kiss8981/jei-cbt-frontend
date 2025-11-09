@@ -2,9 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import useAppRouter from "@/hooks/useAppRouter";
-import { toast } from "sonner";
 import { useLastQuestionSession } from "../_hooks/useQuestionSession";
-import { Dialog } from "@radix-ui/react-dialog";
 
 export default function Home() {
   const { navigate } = useAppRouter();
@@ -29,7 +27,7 @@ export default function Home() {
             전체 문제 학습
           </Button>
           <Button
-            onClick={() => toast.error("준비중입니다.")}
+            onClick={() => navigate("push", "/learn/mock")}
             className="col-span-2"
             size="lg"
           >

@@ -5,7 +5,13 @@ import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession"
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useState } from "react";
 import ResultDialog from "./ResultDialog";
-export const QuestionInterview = ({ question }: { question: string }) => {
+export const QuestionInterview = ({
+  question,
+  initialUserAnswer,
+}: {
+  question: string;
+  initialUserAnswer?: string;
+}) => {
   const {
     question: questionMap,
     isFirstQuestion,
@@ -13,7 +19,7 @@ export const QuestionInterview = ({ question }: { question: string }) => {
   } = useQuestionSessionStore(state => state);
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
     useQuestionSessionAnswer();
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState(initialUserAnswer || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

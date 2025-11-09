@@ -25,12 +25,14 @@ interface QuestionChoiceProps {
   isFirst?: boolean;
   onClickPrevious?: () => void;
   onClickNext?: () => void;
+  initialUserAnswer?: number[]; // 초기 사용자 답변 (선택 사항)
 }
 
 export const QuestionMultipleChoice = ({
   question,
   isMultiple,
   options,
+  initialUserAnswer,
 }: QuestionChoiceProps) => {
   const {
     question: questionMap,
@@ -40,8 +42,16 @@ export const QuestionMultipleChoice = ({
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
     useQuestionSessionAnswer();
 
-  const [singleSelection, setSingleSelection] = useState<number | null>(null); // 단일 선택 상태
-  const [multipleSelections, setMultipleSelections] = useState<number[]>([]); // 복수 선택 상태
+  const [singleSelection, setSingleSelection] = useState<number | null>(
+    isMultiple && initialUserAnswer && initialUserAnswer.length > 0
+      ? null
+      : initialUserAnswer && initialUserAnswer.length > 0
+      ? initialUserAnswer[0]
+      : null
+  ); // 단일 선택 상태
+  const [multipleSelections, setMultipleSelections] = useState<number[]>(
+    initialUserAnswer || []
+  ); // 복수 선택 상태
 
   const handleSingleSelect = (id: number) => {
     setSingleSelection(id);

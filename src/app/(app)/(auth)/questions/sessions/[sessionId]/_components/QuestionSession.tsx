@@ -3,6 +3,7 @@ import UnitQuestionSession from "./unit/UnitQuestionSession";
 import { Suspense } from "react";
 import { QuestionSessionSkeleton } from "./QuestionSessionSkeleton";
 import AllQuestionSession from "./all/AllQuestionSession";
+import MockQuestionSession from "./mock/MockQuestionSession";
 
 const QuestionSession = ({
   session,
@@ -23,7 +24,11 @@ const QuestionSession = ({
         </Suspense>
       );
     case "MOCK":
-      return <></>;
+      return (
+        <Suspense fallback={<QuestionSessionSkeleton />}>
+          <MockQuestionSession />
+        </Suspense>
+      );
   }
 };
 

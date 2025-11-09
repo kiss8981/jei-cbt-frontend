@@ -1,5 +1,55 @@
+import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { Button } from "../button";
 import { Spinner } from "../spinner";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../dialog";
+import useAppRouter from "@/hooks/useAppRouter";
+import { useRouter } from "next/navigation";
+
+const MockEndDialog = ({
+  isOpen,
+  setOpen,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  setOpen: (open: boolean) => void;
+  onConfirm: () => void;
+}) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>모의고사 종료</DialogTitle>
+          <DialogDescription>모의고사를 종료하시겠습니까?</DialogDescription>
+          <DialogDescription>
+            현재까지의 답안으로 채점이 진행됩니다.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="grid grid-cols-2 gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            취소
+          </Button>
+          <Button color="green" onClick={onConfirm}>
+            종료하기
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const SubmitButton = ({
   isFirst = false,
@@ -14,36 +64,66 @@ const SubmitButton = ({
   loadingSubmit?: boolean;
   loadingPrevious?: boolean;
 }) => {
+  const { question: questionMap, session } = useQuestionSessionStore(
+    state => state
+  );
+  const { navigate } = useAppRouter();
+  const router = useRouter();
+  const [isOpenMockEndDialog, setIsOpenMockEndDialog] = useState(false);
+
+  const onClickMockEnd = () => {
+    router.replace(`/questions/sessions/${session?.id}/result`);
+  };
+
   return (
-    <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-[600px] pt-3"
-      style={{
-        paddingBottom: `calc(var(--safe-area-inset-bottom, 0px) + 12px)`,
-      }}
-    >
-      <div className={`grid ${isFirst ? "grid-cols-1" : "grid-cols-2"} gap-3`}>
-        {!isFirst && (
+    <>
+      <MockEndDialog
+        isOpen={isOpenMockEndDialog}
+        setOpen={setIsOpenMockEndDialog}
+        onConfirm={onClickMockEnd}
+      />
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-[600px] pt-3"
+        style={{
+          paddingBottom: `calc(var(--safe-area-inset-bottom, 0px) + 12px)`,
+        }}
+      >
+        <div
+          className={`grid ${isFirst ? "grid-cols-1" : "grid-cols-2"} gap-3`}
+        >
+          {!isFirst && (
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                onPrevious && onPrevious();
+              }}
+              disabled={loadingPrevious || loadingSubmit}
+            >
+              {loadingPrevious ? <Spinner /> : "이전"}
+            </Button>
+          )}
+          <Button
+            type="submit"
+            size="lg"
+            disabled={disabledSubmit || loadingSubmit || loadingPrevious}
+          >
+            {loadingSubmit ? <Spinner /> : "제출"}
+          </Button>
+        </div>
+        {session?.type === "MOCK" && (
           <Button
             type="button"
-            size="lg"
-            variant="outline"
-            onClick={() => {
-              onPrevious && onPrevious();
-            }}
-            disabled={loadingPrevious || loadingSubmit}
+            variant="link"
+            className="w-full text-xs text-center underline text-gray-500"
+            onClick={setIsOpenMockEndDialog.bind(null, true)}
           >
-            {loadingPrevious ? <Spinner /> : "이전"}
+            그만하고 채점하기
           </Button>
         )}
-        <Button
-          type="submit"
-          size="lg"
-          disabled={disabledSubmit || loadingSubmit || loadingPrevious}
-        >
-          {loadingSubmit ? <Spinner /> : "제출"}
-        </Button>
       </div>
-    </div>
+    </>
   );
 };
 

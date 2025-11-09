@@ -8,7 +8,13 @@ import ResultDialog from "./ResultDialog";
 import BottomKeypad from "./BottomKeypad";
 import { YesNoSegment } from "./TrueFalseSegment";
 
-export const QuestionTrueFalse = ({ question }: { question: string }) => {
+export const QuestionTrueFalse = ({
+  question,
+  initialUserAnswer,
+}: {
+  question: string;
+  initialUserAnswer?: boolean;
+}) => {
   const {
     question: questionMap,
     isFirstQuestion,
@@ -17,7 +23,7 @@ export const QuestionTrueFalse = ({ question }: { question: string }) => {
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
     useQuestionSessionAnswer();
 
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState<boolean>(initialUserAnswer || false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
