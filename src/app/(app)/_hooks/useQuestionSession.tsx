@@ -169,7 +169,9 @@ export const useQuestionSessionByAll = (unidIds: number[]) => {
   };
 };
 
-export const useQuestionSessionByMock = (unidIds: number[]) => {
+export const useQuestionSessionByMock = () => {
+  const [count, setCount] = useState(10);
+  const [unitIds, setUnitIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { navigate } = useAppRouter();
 
@@ -180,7 +182,8 @@ export const useQuestionSessionByMock = (unidIds: number[]) => {
         BaseResponse<GetUnitQuestionSessionAppDto>
       >(`/questions/sessions/by-mock`, {
         type: "UNIT",
-        unitIds: unidIds.map(id => Number(id)),
+        unitIds: unitIds.map(id => Number(id)),
+        count,
       });
 
       if (data.code !== 200) {
@@ -200,6 +203,9 @@ export const useQuestionSessionByMock = (unidIds: number[]) => {
   return {
     isLoading,
     handleCreate,
+    setUnitIds,
+    setCount,
+    count,
   };
 };
 
