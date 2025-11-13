@@ -11,10 +11,11 @@ import {
   useQuestionSessionByAll,
   useQuestionSessionByMock,
 } from "@/app/(app)/_hooks/useQuestionSession";
-import { TwoFixedButton } from "@/components/ui/button";
+import { FixedButton, TwoFixedButton } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const ITEMS_PER_PAGE = 10;
 const INITIAL_PAGE = 1;
@@ -69,7 +70,7 @@ export const UnitsLoadingSkeleton = () => (
   </div>
 );
 
-const Units = () => {
+const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
   const [allUnits, setAllUnits] = useState<GetUnitListAppDto[]>([]);
   const [searchParams, setSearchParams] = useState<GetUnitListQueryAppDto>({
     page: INITIAL_PAGE,
@@ -78,8 +79,6 @@ const Units = () => {
   const [hasMore, setHasMore] = useState(true);
   const { units, totalCount, isLoading, error } = useUnits(searchParams);
   const [selectedUnitIds, setSelectedUnitIds] = useState<number[]>([]);
-  const { handleCreate, isLoading: isCreateSessionLoading } =
-    useQuestionSessionByMock(selectedUnitIds);
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -118,7 +117,13 @@ const Units = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative">
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      transition={{ duration: 0.2 }}
+      className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative"
+    >
       <div className="p-0">
         {allUnits.map(unit => (
           <UnitItem
@@ -182,19 +187,101 @@ const Units = () => {
           },
         }}
         right={{
-          children: isCreateSessionLoading ? (
-            <Spinner className="w-5 h-5" />
-          ) : (
-            "시작"
-          ),
+          children: "다음",
           props: {
-            onClick: () => handleCreate(),
-            disabled: selectedUnitIds.length === 0 || isCreateSessionLoading,
+            onClick: () => handleNext(selectedUnitIds),
+            disabled: selectedUnitIds.length === 0,
           },
         }}
       />
+    </motion.div>
+  );
+};
+
+const QuestionCount = ({
+  handleNext,
+  isLoading,
+  count,
+  setCount,
+}: {
+  handleNext: () => void;
+  count: number;
+  setCount: (count: number) => void;
+  isLoading: boolean;
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      transition={{ duration: 0.2 }}
+      className="w-full bg-white  relative"
+    >
+      <div className="flex flex-col items-start px-4">
+        <h2 className="text-2xl font-semibold">몇 문제를</h2>
+        <h2 className="text-2xl font-semibold">풀고 싶으신가요?</h2>
+        {/* input */}
+        <div className="flex flex-row w-full mt-22 relative">
+          <input
+            type="number"
+            min={1}
+            max={100}
+            value={count}
+            onChange={e => setCount(Number(e.target.value))}
+            className="w-full py-2 border-b outline-0"
+            data-testid="question-count-input"
+          />
+          <p className="ml-2 mt-2 text-gray-600 dark:text-gray-300 min-w-fit absolute right-0 bottom-2.5">
+            문제
+          </p>
+        </div>
+        <FixedButton
+          onClick={() => handleNext()}
+          disabled={count < 1 || count > 100}
+        >
+          {isLoading ? <Spinner /> : "시작하기"}
+        </FixedButton>
+      </div>
+    </motion.div>
+  );
+};
+
+const MockUnit = () => {
+  const [type, setType] = useState<"SELECT_UNIT" | "SELECT_QUESTION_COUNT">(
+    "SELECT_UNIT"
+  );
+  const {
+    handleCreate,
+    isLoading: isCreateSessionLoading,
+    setCount,
+    setUnitIds,
+    count,
+  } = useQuestionSessionByMock();
+
+  return (
+    <div className="min-h-screen w-full relative">
+      <AnimatePresence initial={false} mode="wait">
+        {type === "SELECT_UNIT" && (
+          <Unit
+            key="SELECT_UNIT"
+            handleNext={(selectedUnitIds: number[]) => {
+              setUnitIds(selectedUnitIds);
+              setType("SELECT_QUESTION_COUNT");
+            }}
+          />
+        )}
+        {type === "SELECT_QUESTION_COUNT" && ( // ➡️ 조건부 렌더링
+          <QuestionCount
+            key="SELECT_QUESTION_COUNT"
+            handleNext={handleCreate}
+            setCount={setCount}
+            count={count}
+            isLoading={isCreateSessionLoading}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-export default Units;
+export default MockUnit;
