@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { GetQuestionSessionResultAppDto } from "@/lib/http/apis/dtos/app/question/get-question-session-result.app.dto";
 
 export const useQuestionSessionByUnitId = (unitId: number) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -170,7 +171,7 @@ export const useQuestionSessionByAll = (unidIds: number[]) => {
 };
 
 export const useQuestionSessionByMock = () => {
-  const [count, setCount] = useState(10);
+  const [count, setCount] = useState(20);
   const [unitIds, setUnitIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { navigate } = useAppRouter();
@@ -314,6 +315,9 @@ export const useQuestionSessionAnswer = () => {
     hasMoreQuestions,
   } = useQuestionSessionStore(state => state);
   const [isResultOpen, setIsResultOpen] = useState(false);
+
+  const [mockEndDialogOpen, setMockEndDialogOpen] = useState(false);
+
   const [result, setResult] = useState<SubmissionAnswerResponseAppDto | null>(
     null
   );
@@ -339,6 +343,10 @@ export const useQuestionSessionAnswer = () => {
           setIsResultOpen(true);
           break;
         case "MOCK":
+          if (!hasMoreQuestions) {
+            setIsResultOpen(true);
+            break;
+          }
           nextQuestion();
           break;
         default:
@@ -359,5 +367,45 @@ export const useQuestionSessionAnswer = () => {
     result,
     isResultOpen,
     setIsResultOpen,
+  };
+};
+
+export const useQuestionSessionResult = (sessionId: number) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [result, setResult] = useState<GetQuestionSessionResultAppDto | null>(
+    null
+  );
+
+  useEffect(() => {
+    fetchResult();
+  }, []);
+
+  const fetchResult = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await http.get<
+        BaseResponse<GetQuestionSessionResultAppDto>
+      >(`/questions/sessions/${sessionId}/result`);
+
+      if (data.code !== 200) {
+        throw new Error(
+          data.message || "문제 세션 결과 불러오기에 실패했습니다."
+        );
+      }
+
+      setResult(data.data);
+
+      return data;
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    result,
+    fetchResult,
   };
 };

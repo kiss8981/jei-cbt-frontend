@@ -13,43 +13,7 @@ import {
 } from "../dialog";
 import useAppRouter from "@/hooks/useAppRouter";
 import { useRouter } from "next/navigation";
-
-const MockEndDialog = ({
-  isOpen,
-  setOpen,
-  onConfirm,
-}: {
-  isOpen: boolean;
-  setOpen: (open: boolean) => void;
-  onConfirm: () => void;
-}) => {
-  return (
-    <Dialog open={isOpen} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>모의고사 종료</DialogTitle>
-          <DialogDescription>모의고사를 종료하시겠습니까?</DialogDescription>
-          <DialogDescription>
-            현재까지의 답안으로 채점이 진행됩니다.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="grid grid-cols-2 gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            취소
-          </Button>
-          <Button color="green" onClick={onConfirm}>
-            종료하기
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
+import { MockEndDialog } from "./ResultDialog";
 
 const SubmitButton = ({
   isFirst = false,

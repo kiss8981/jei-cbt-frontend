@@ -11,6 +11,45 @@ import { SubmissionAnswerResponseAppDto } from "@/lib/http/apis/dtos/app/questio
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { Button } from "../button";
 import useAppRouter from "@/hooks/useAppRouter";
+import { SessionType } from "@/lib/http/apis/dtos/common/session-type.enum";
+import { useRouter } from "next/navigation";
+
+export const MockEndDialog = ({
+  isOpen,
+  setOpen,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  setOpen: (open: boolean) => void;
+  onConfirm: () => void;
+}) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>모의고사 종료</DialogTitle>
+          <DialogDescription>모의고사를 종료하시겠습니까?</DialogDescription>
+          <DialogDescription>
+            현재까지의 답안으로 채점이 진행됩니다.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="grid grid-cols-2 gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            취소
+          </Button>
+          <Button color="green" onClick={onConfirm}>
+            종료하기
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const ResultDialog = ({
   result,
@@ -32,10 +71,25 @@ const ResultDialog = ({
     hasMoreQuestions,
   } = useQuestionSessionStore(state => state);
   const { navigate } = useAppRouter();
+  const router = useRouter();
   const handleNext = async () => {
     setIsResultOpen(false);
     nextQuestion();
   };
+
+  const onClickMockEnd = () => {
+    router.replace(`/questions/sessions/${session?.id}/result`);
+  };
+
+  if (session.type == SessionType.MOCK) {
+    return (
+      <MockEndDialog
+        isOpen={isResultOpen}
+        setOpen={setIsResultOpen}
+        onConfirm={onClickMockEnd}
+      />
+    );
+  }
 
   return (
     <Dialog open={isResultOpen} onOpenChange={setIsResultOpen}>
