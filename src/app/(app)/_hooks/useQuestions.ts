@@ -1,14 +1,14 @@
 "use client";
 import useSWR from "swr";
 
-import { adminHttpSWR, BaseResponse } from "@/lib/http/admin-http";
+import { http, BaseResponse } from "@/lib/http/http";
 
 export const useQuestionByUnit = (unitId: number) => {
   const swrKey = `/questions/by-unit/${unitId}`;
 
   const { data, isLoading, error, mutate } = useSWR<BaseResponse<any>>(
     swrKey,
-    adminHttpSWR,
+    http,
     {
       revalidateOnFocus: false,
       dedupingInterval: 1000,

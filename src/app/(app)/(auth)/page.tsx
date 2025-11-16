@@ -33,6 +33,14 @@ export default function Home() {
           >
             모의고사
           </Button>
+
+          <Button
+            onClick={() => navigate("push", "/learn/wrong")}
+            className="col-span-2"
+            size="lg"
+          >
+            틀린 문제 복습
+          </Button>
         </div>
       </div>
     </>
