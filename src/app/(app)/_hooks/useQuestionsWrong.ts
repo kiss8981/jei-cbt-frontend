@@ -30,8 +30,8 @@ export const useQuestionsWrong = ({
   ) => {
     const page = pageIndex + 1;
     if (
-      previousPageData &&
-      previousPageData?.data?.[0].data.items?.length! < limit
+      (previousPageData && previousPageData?.data?.[0].data.items?.length) ??
+      0 < limit
     ) {
       return null;
     }
