@@ -13,6 +13,8 @@ import { Button, FixedButton } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
 
 const ITEMS_PER_PAGE = 10;
 const INITIAL_PAGE = 1;
@@ -67,7 +69,94 @@ export const UnitsLoadingSkeleton = () => (
   </div>
 );
 
-const Units = () => {
+const SelectQuestionTypes = ({
+  setQuestionTypes,
+  questionTypes,
+  isLoading,
+  handleNext,
+}: {
+  questionTypes: QuestionType[];
+  setQuestionTypes: (questionTypes: QuestionType[]) => void;
+  isLoading: boolean;
+  handleNext: () => void;
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      transition={{ duration: 0.2 }}
+      className="w-full bg-white  relative"
+    >
+      <div className="flex flex-col items-start px-4">
+        <h2 className="text-2xl font-semibold">풀고 싶은</h2>
+        <h2 className="text-2xl font-semibold">문제 유형이 있나요?</h2>
+        {/* input */}
+        <div className="flex flex-row w-full mt-22 relative">
+          <div className="flex flex-col w-full space-y-4 my-8">
+            {Object.values(QuestionType)
+              .filter(
+                type =>
+                  type === QuestionType.MULTIPLE_CHOICE ||
+                  type === QuestionType.TRUE_FALSE ||
+                  type === QuestionType.SHORT_ANSWER ||
+                  type === QuestionType.INTERVIEW ||
+                  type === QuestionType.MATCHING
+              )
+              .map(type => (
+                <div
+                  key={type}
+                  className="flex flex-row items-center space-x-4"
+                >
+                  <input
+                    type="checkbox"
+                    id={type}
+                    checked={questionTypes.includes(type)}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setQuestionTypes([...questionTypes, type]);
+                      } else {
+                        setQuestionTypes(questionTypes.filter(t => t !== type));
+                      }
+                    }}
+                    className="w-5 h-5"
+                  />
+                  <label
+                    htmlFor={type}
+                    className="text-lg font-medium select-none"
+                  >
+                    {type === QuestionType.MULTIPLE_CHOICE
+                      ? "객관식"
+                      : type === QuestionType.TRUE_FALSE
+                      ? "OX 문제"
+                      : type === QuestionType.SHORT_ANSWER
+                      ? "단답형"
+                      : type == QuestionType.INTERVIEW
+                      ? "면접형"
+                      : type == QuestionType.MATCHING
+                      ? "연결형"
+                      : "기타"}
+                  </label>
+                </div>
+              ))}
+          </div>
+        </div>
+        <FixedButton
+          onClick={() => handleNext()}
+          disabled={questionTypes.length === 0 || isLoading}
+        >
+          {isLoading ? <Spinner /> : "시작하기"}
+        </FixedButton>
+      </div>
+    </motion.div>
+  );
+};
+
+const SelectUnit = ({
+  handleNext,
+}: {
+  handleNext: (unitId: number) => void;
+}) => {
   const [allUnits, setAllUnits] = useState<GetUnitListAppDto[]>([]);
   const [searchParams, setSearchParams] = useState<GetUnitListQueryAppDto>({
     page: INITIAL_PAGE,
@@ -75,9 +164,7 @@ const Units = () => {
   });
   const [hasMore, setHasMore] = useState(true);
   const { units, totalCount, isLoading, error } = useUnits(searchParams);
-  const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
-  const { handleCreate, isLoading: isCreateSessionLoading } =
-    useQuestionSessionByUnitId(selectedUnitId!);
+  const [selectedUnitId, setUnitId] = useState<number | null>(null);
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -116,13 +203,13 @@ const Units = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative">
+    <div className="w-full bg-white dark:bg-gray-900">
       <div className="p-0">
         {allUnits.map(unit => (
           <UnitItem
             key={unit.id}
             unit={unit}
-            handleSelect={setSelectedUnitId}
+            handleSelect={setUnitId}
             selected={selectedUnitId == unit.id}
           />
         ))}
@@ -159,18 +246,55 @@ const Units = () => {
 
       <FixedButton
         size="lg"
-        disabled={!selectedUnitId || isCreateSessionLoading}
+        disabled={!selectedUnitId}
         onClick={async () => {
           if (selectedUnitId) {
-            await handleCreate();
+            handleNext(selectedUnitId);
           }
         }}
         data-testid="start-quiz-button"
       >
-        {isCreateSessionLoading ? <Spinner /> : "시작"}
+        다음
       </FixedButton>
     </div>
   );
 };
 
-export default Units;
+const Unit = () => {
+  const [type, setType] = useState<"SELECT_UNIT" | "SELECT_QUESTION_TYPES">(
+    "SELECT_UNIT"
+  );
+  const {
+    handleCreate,
+    isLoading: isCreateSessionLoading,
+    setUnitId,
+    setQuestionTypes,
+    questionTypes,
+  } = useQuestionSessionByUnitId();
+  return (
+    <div className="flex flex-col bg-white">
+      <AnimatePresence initial={false} mode="wait">
+        {type === "SELECT_UNIT" && (
+          <SelectUnit
+            key="SELECT_UNIT"
+            handleNext={(selectedUnitId: number) => {
+              setUnitId(selectedUnitId);
+              setType("SELECT_QUESTION_TYPES");
+            }}
+          />
+        )}
+        {type === "SELECT_QUESTION_TYPES" && ( // ➡️ 조건부 렌더링
+          <SelectQuestionTypes
+            key="SELECT_QUESTION_COUNT"
+            handleNext={handleCreate}
+            setQuestionTypes={setQuestionTypes}
+            questionTypes={questionTypes}
+            isLoading={isCreateSessionLoading}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default Unit;

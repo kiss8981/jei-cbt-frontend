@@ -122,7 +122,7 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.2 }}
-      className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative"
+      className="w-full bg-white dark:bg-gray-900 min-h-screen"
     >
       <div className="p-0">
         {allUnits.map(unit => (
@@ -259,7 +259,7 @@ const MockUnit = () => {
   } = useQuestionSessionByMock();
 
   return (
-    <div className="min-h-screen w-full relative">
+    <div className="flex flex-col bg-white">
       <AnimatePresence initial={false} mode="wait">
         {type === "SELECT_UNIT" && (
           <Unit

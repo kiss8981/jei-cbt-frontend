@@ -23,8 +23,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { GetQuestionSessionResultAppDto } from "@/lib/http/apis/dtos/app/question/get-question-session-result.app.dto";
+import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
 
-export const useQuestionSessionByUnitId = (unitId: number) => {
+export const useQuestionSessionByUnitId = () => {
+  const [unitId, setUnitId] = useState<number | null>(null);
+  const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [questionSession, setQuestionSession] =
     useState<GetUnitQuestionSessionAppDto | null>(null);
@@ -43,7 +46,11 @@ export const useQuestionSessionByUnitId = (unitId: number) => {
       setIsLoading(true);
       const { data } = await http.post<
         BaseResponse<GetUnitQuestionSessionAppDto>
-      >(`/questions/sessions/by-unit/${unitId}`);
+      >(
+        `/questions/sessions/by-unit/${unitId}?questionTypes=${
+          questionTypes ? questionTypes.join(",") : ""
+        }`
+      );
 
       if (data.code !== 200) {
         throw new Error(data.message || "문제 세션 생성에 실패했습니다.");
@@ -66,6 +73,10 @@ export const useQuestionSessionByUnitId = (unitId: number) => {
   return {
     isLoading,
     handleCreate,
+    setUnitId,
+    setQuestionTypes,
+    unitId,
+    questionTypes,
   };
 };
 
