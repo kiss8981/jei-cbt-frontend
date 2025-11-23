@@ -2,17 +2,17 @@
 
 import { useQuestionSessions } from "@/app/admin/_hooks/apis/useQuestionSessions";
 import { Pagination, PaginationResultCount } from "@/components/ui/pagination";
-import { useQuestionsFilterStore } from "@/lib/store/stores/questions-store";
 import { useMemo } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import LearnRecordsFilter from "./LearnRecordsFilter";
+import { LearnRecordsFilter } from "./LearnRecordsFilter";
 import { UseQuestionSessionsSearchParams } from "@/app/admin/_hooks/apis/useQuestionSessions";
 import { LearnRecordsTable } from "./LearnRecordsTable";
+import { useAdminQuestionSessionFilterStore } from "@/lib/store/stores/admin-question-sessions-store";
 
 const Questions = () => {
-  const store = useQuestionsFilterStore();
+  const store = useAdminQuestionSessionFilterStore();
 
   const apiParams = useMemo(() => {
     const params: UseQuestionSessionsSearchParams = {
@@ -25,7 +25,7 @@ const Questions = () => {
     }
 
     return params;
-  }, [store.searchQuery, store.unitFilter, store.page, store.pageSize]);
+  }, [store.searchQuery, store.page, store.pageSize]);
 
   const { questions, totalCount, isLoading, error } =
     useQuestionSessions(apiParams);
@@ -70,7 +70,7 @@ const Questions = () => {
       <Pagination
         totalCount={totalCount}
         isLoading={isLoading}
-        useStore={useQuestionsFilterStore}
+        useStore={useAdminQuestionSessionFilterStore}
       />
     </>
   );
