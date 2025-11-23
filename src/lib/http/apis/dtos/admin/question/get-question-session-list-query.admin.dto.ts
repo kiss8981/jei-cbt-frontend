@@ -1,5 +1,4 @@
-import { IsNumberString, IsOptional, IsString } from 'class-validator';
-import { toArray } from 'src/utils/toArray';
+import { IsNumberString, IsOptional, IsString } from "class-validator";
 
 export class GetQuestionSessionListQueryAdminDto {
   @IsOptional()
@@ -16,6 +15,5 @@ export class GetQuestionSessionListQueryAdminDto {
 
   @IsOptional()
   @IsString({ each: true })
-  @toArray()
   userIds?: number[];
 }

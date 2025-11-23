@@ -1,5 +1,5 @@
-import { Expose } from 'class-transformer';
-import { SessionType } from 'src/common/constants/session-type.enum';
+import { Expose } from "class-transformer";
+import { SessionType } from "../../common/session-type.enum";
 
 export class GetQuestionSessionListAdminDto {
   @Expose()
