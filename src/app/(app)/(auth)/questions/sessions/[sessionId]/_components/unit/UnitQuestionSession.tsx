@@ -7,7 +7,7 @@ import UnitQuestionSessionAnswer from "../QuestionSessionAnswer";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { useSessionSegment } from "@/app/(app)/_hooks/useQuestionSessionSegment";
 import { useEffect } from "react";
-import { FixedElapsedTime } from "@/components/ui/question/FixedElapsedTime";
+import { FixedElapsedTimeAndQuestionIndex } from "@/components/ui/question/FixedElapsedTimeAndQuestionIndex";
 
 const UnitQuestionSession = () => {
   const { isQuestionLoading, question, session } = useQuestionSessionStore(
@@ -38,7 +38,15 @@ const UnitQuestionSession = () => {
   return (
     <AnimatePresence mode="wait" initial={false}>
       {renderContent()}
-      {question && <FixedElapsedTime ms={elapsedMs} />}
+      {question && (
+        <FixedElapsedTimeAndQuestionIndex
+          ms={elapsedMs}
+          currentIndex={
+            session.totalQuestions - (question.nextQuestionCount || 0)
+          }
+          total={session.totalQuestions}
+        />
+      )}
     </AnimatePresence>
   );
 };

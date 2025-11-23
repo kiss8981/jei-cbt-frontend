@@ -15,4 +15,10 @@ export const SidebarItems = {
       activePaths: ["/admin/users"],
     },
   },
+  "학습 관리": {
+    "학습 기록 조회": {
+      path: "/admin/learn-records",
+      activePaths: ["/admin/learn-records"],
+    },
+  },
 };
