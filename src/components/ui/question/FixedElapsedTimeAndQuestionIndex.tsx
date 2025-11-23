@@ -6,7 +6,15 @@ import { formatHMS } from "@/utils/formatHMS";
 
 const bottomMarginQuestionTypes = [QuestionType.MULTIPLE_CHOICE];
 
-export const FixedElapsedTime = ({ ms }: { ms: number }) => {
+export const FixedElapsedTimeAndQuestionIndex = ({
+  ms,
+  currentIndex,
+  total,
+}: {
+  ms: number;
+  currentIndex?: number;
+  total?: number;
+}) => {
   const { question: questionMap, session } = useQuestionSessionStore(
     state => state
   );
@@ -26,7 +34,14 @@ export const FixedElapsedTime = ({ ms }: { ms: number }) => {
       }}
       key="elapsed-time"
     >
-      {formatHMS(Math.round(ms / 1000))}
+      {formatHMS(Math.round(ms / 1000))}{" "}
+      {currentIndex !== undefined && total !== undefined ? (
+        <span className="ml-2 text-gray-500 dark:text-gray-400">
+          {currentIndex}번 / {total} 문제
+        </span>
+      ) : (
+        ""
+      )}
     </div>
   );
 };
