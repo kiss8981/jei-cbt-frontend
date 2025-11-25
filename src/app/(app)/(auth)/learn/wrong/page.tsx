@@ -6,7 +6,7 @@ export const metadata = {
 
 const LearnUnitPage = () => {
   return (
-    <div className="flex flex-col bg-white py-4">
+    <div className="flex flex-col bg-white">
       <WrongQuestionListPage />
     </div>
   );

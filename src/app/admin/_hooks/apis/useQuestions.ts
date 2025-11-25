@@ -11,6 +11,7 @@ import { GetQuestionListAdminDto } from "@/lib/http/apis/dtos/admin/question/get
 import { GetQuestionAdminUnionDto } from "@/lib/http/apis/dtos/admin/question/get-question.admin.dto";
 import { useState } from "react";
 import { toast } from "sonner";
+import { UpdateQuestionAdminDto } from "@/lib/http/apis/dtos/admin/question/update-question.admin.dto";
 export interface UseQuestionsSearchParams {
   keyword?: string;
   page?: number;
@@ -75,36 +76,45 @@ export const useQuestion = (questionId: number) => {
     refetch: mutate,
   };
 };
-
-export const useQuestionForEdit = (questionId: number) => {
-  const [isLoading, setIsLoading] = useState(false);
+export const useQuestionUpdate = (questionId: number) => {
+  const [isUpdating, setIsUpdating] = useState(false);
   const { refetch } = useQuestion(questionId);
 
-  const handleEdit = async (payload: any) => {
+  const handleEdit = async (
+    payload: UpdateQuestionAdminDto
+  ): Promise<boolean> => {
     try {
-      setIsLoading(true);
-      const { data } = await adminHttp.post<BaseResponse<any>>(
-        `/admin/questions/${questionId}/edit`,
+      setIsUpdating(true);
+
+      const { data } = await adminHttp.put<BaseResponse<any>>(
+        `/admin/questions/${questionId}`,
         payload
       );
 
       if (data.code !== 200) {
         throw new Error(data.message || "문제 수정에 실패했습니다.");
       }
+
+      // 데이터 갱신
       await refetch();
 
       toast.success("문제가 성공적으로 수정되었습니다.");
-
-      return data;
+      return true; // 성공 시 true 반환
     } catch (error: any) {
-      toast.error(error.message);
+      // 에러 메시지 추출 로직 강화
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "알 수 없는 오류가 발생했습니다.";
+      toast.error(errorMessage);
+      return false; // 실패 시 false 반환
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
   return {
-    isLoading,
+    isUpdating, // isLoading 대신 구체적인 명칭 사용
     handleEdit,
   };
 };
