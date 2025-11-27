@@ -92,12 +92,12 @@ export const QuestionMatching = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* 연결 항목 목록 */}
-          <div className="grid gap-4 p-3 border rounded-lg bg-muted/20">
+          <div className="grid gap-6 p-3 border rounded-lg bg-muted/20">
             {leftItems.map(item => (
               <div key={item.id} className="flex items-center justify-between">
                 {/* 왼쪽 항목 텍스트 */}
                 <span className="w-1/3 font-semibold text-base">
-                  {item.option}
+                  • {item.option}
                 </span>
 
                 {/* 오른쪽 항목을 선택하는 Select 드롭다운 */}
