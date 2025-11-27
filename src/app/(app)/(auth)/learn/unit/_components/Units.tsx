@@ -101,7 +101,8 @@ const SelectQuestionTypes = ({
                   type === QuestionType.TRUE_FALSE ||
                   type === QuestionType.SHORT_ANSWER ||
                   type === QuestionType.INTERVIEW ||
-                  type === QuestionType.MATCHING
+                  type === QuestionType.MATCHING ||
+                  type === QuestionType.MULTIPLE_SHORT_ANSWER
               )
               .map(type => (
                 <div
@@ -135,6 +136,8 @@ const SelectQuestionTypes = ({
                       ? "면접형"
                       : type == QuestionType.MATCHING
                       ? "연결형"
+                      : type == QuestionType.MULTIPLE_SHORT_ANSWER
+                      ? "빈칸 채우기"
                       : "기타"}
                   </label>
                 </div>
