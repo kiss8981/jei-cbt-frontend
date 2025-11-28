@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Image as ImageIcon, Plus, Trash2 } from "lucide-react";
+import { Image as ImageIcon, Plus, Trash2, ArrowRightLeft } from "lucide-react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -43,12 +43,8 @@ import { UpdateQuestionAdminDto } from "@/lib/http/apis/dtos/admin/question/upda
 import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
 
 const Question = ({ questionId }: { questionId: number }) => {
-  // 1. 데이터 조회 Hook
   const { question, isLoading: isFetching, refetch } = useQuestion(questionId);
-
-  // 2. 데이터 수정 Hook
   const { handleEdit, isUpdating } = useQuestionUpdate(questionId);
-
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
 
   const form = useForm<AdminUpdateQuestionInput>({
@@ -58,40 +54,73 @@ const Question = ({ questionId }: { questionId: number }) => {
       explanation: "",
       additionalText: "",
       answersForShortAnswers: [],
+      answersForMatching: [], // 연결형 초기값
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  // [Hook 1] 단답형 필드 배열
+  const {
+    fields: shortAnswerFields,
+    append: appendShort,
+    remove: removeShort,
+  } = useFieldArray({
     control: form.control,
     name: "answersForShortAnswers",
   });
 
+  // [Hook 2] 연결형 필드 배열 👈 추가됨
+  const {
+    fields: matchingFields,
+    append: appendMatching,
+    remove: removeMatching,
+  } = useFieldArray({
+    control: form.control,
+    name: "answersForMatching",
+  });
+
   const { isDirty } = form.formState;
 
-  // 초기 데이터 로드
+  // 초기 데이터 로드 및 매핑
   useEffect(() => {
     if (question) {
+      // 1. 단답형 데이터 매핑
+      const shortAnswers =
+        question.type === QuestionType.SHORT_ANSWER
+          ? question.correctAnswers || []
+          : [];
+
+      // 2. 연결형 데이터 매핑 👈 (GET DTO -> Form DTO 변환)
+      // GET DTO는 items: { leftItem: {id, content}, rightItem: {id, content} }[] 구조라고 가정
+      const matchingAnswers =
+        question.type === QuestionType.MATCHING && question.items
+          ? question.items.map(item => {
+              return {
+                leftItemId: Number(item.leftItem.id),
+                pairingItemId: Number(item.rightItem.id),
+                leftItem: item.leftItem.content,
+                rightItem: item.rightItem.content,
+              };
+            })
+          : [];
+
       form.reset({
         title: question.title,
         explanation: question.explanation || "",
         additionalText: question.additionalText || "",
-        // 타입이 단답형일 때만 정답 데이터를 폼에 바인딩
-        answersForShortAnswers:
-          question.type === QuestionType.SHORT_ANSWER
-            ? question.correctAnswers // DTO에 따라 필드명이 다를 수 있음 (answersForShortAnswers 확인 필요)
-            : [],
+        answersForShortAnswers: shortAnswers,
+        answersForMatching: matchingAnswers,
       });
     }
   }, [question, form]);
 
-  // 3. 폼 제출 핸들러
   async function onSubmit(values: AdminUpdateQuestionInput) {
-    // DTO 변환
+    console.log(values.answersForMatching);
     const payload: UpdateQuestionAdminDto = {
       title: values.title,
       explanation: values.explanation,
       additionalText: values.additionalText,
-      // 단답형일 때만 정답 목록을 보냄 (다른 유형일 경우 빈 배열)
+
+      // 단답형 처리
       answersForShortAnswers:
         question?.type === QuestionType.SHORT_ANSWER
           ? values.answersForShortAnswers?.map(ans => ({
@@ -99,9 +128,19 @@ const Question = ({ questionId }: { questionId: number }) => {
               content: ans.content,
             })) || []
           : [],
+
+      // 연결형 처리 👈 (Form DTO -> POST DTO)
+      answersForMatching:
+        question?.type === QuestionType.MATCHING
+          ? values.answersForMatching?.map(ans => ({
+              leftItemId: ans.leftItemId ?? null,
+              pairingItemId: ans.pairingItemId ?? null,
+              leftItem: ans.leftItem,
+              rightItem: ans.rightItem,
+            }))
+          : [],
     };
 
-    // API 호출
     const isSuccess = await handleEdit(payload);
 
     if (isSuccess) {
@@ -109,7 +148,6 @@ const Question = ({ questionId }: { questionId: number }) => {
     }
   }
 
-  // 로딩 상태 처리
   if (isFetching || !question) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -120,13 +158,18 @@ const Question = ({ questionId }: { questionId: number }) => {
 
   return (
     <div className="space-y-6 p-1 pb-24">
+      {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">문제 수정</h1>
           <p className="text-muted-foreground">
-            {question.type === QuestionType.SHORT_ANSWER
-              ? "단답형 문제의 정답과 내용을 관리합니다."
-              : "문제의 기본 정보를 수정합니다."}
+            {question.type === QuestionType.MATCHING &&
+              "연결형 문제의 보기 쌍을 관리합니다."}
+            {question.type === QuestionType.SHORT_ANSWER &&
+              "단답형 문제의 정답을 관리합니다."}
+            {question.type !== QuestionType.MATCHING &&
+              question.type !== QuestionType.SHORT_ANSWER &&
+              "문제 정보를 수정합니다."}
           </p>
         </div>
         <Button
@@ -141,7 +184,7 @@ const Question = ({ questionId }: { questionId: number }) => {
 
       <Form {...form}>
         <form onSubmit={e => e.preventDefault()} className="space-y-6">
-          {/* 1. 기본 정보 카드 (모든 유형 공통) */}
+          {/* 1. 기본 정보 카드 */}
           <Card>
             <CardHeader>
               <CardTitle>기본 정보</CardTitle>
@@ -157,7 +200,7 @@ const Question = ({ questionId }: { questionId: number }) => {
                       문제 제목 (질문) <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="예: 대한민국의 수도는?" {...field} />
+                      <Input placeholder="질문 내용을 입력하세요" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,7 +215,7 @@ const Question = ({ questionId }: { questionId: number }) => {
                       <FormLabel>문제 해설</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="정답에 대한 해설"
+                          placeholder="해설 입력"
                           className="min-h-[100px] resize-none"
                           {...field}
                         />
@@ -189,7 +232,7 @@ const Question = ({ questionId }: { questionId: number }) => {
                       <FormLabel>추가 설명</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="문제 하단 힌트"
+                          placeholder="힌트 입력"
                           className="min-h-[100px] resize-none"
                           {...field}
                         />
@@ -202,14 +245,14 @@ const Question = ({ questionId }: { questionId: number }) => {
             </CardContent>
           </Card>
 
-          {/* 2. 정답 관리 카드: [단답형]일 때만 표시 👈 핵심 수정 사항 */}
+          {/* 2. 단답형 UI (기존 코드) */}
           {question.type === QuestionType.SHORT_ANSWER && (
-            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <div className="flex flex-col gap-1">
                   <CardTitle>정답 관리 (단답형)</CardTitle>
                   <CardDescription>
-                    인정되는 모든 정답을 입력해주세요.
+                    인정되는 정답을 입력해주세요.
                   </CardDescription>
                 </div>
                 <Button
@@ -217,19 +260,13 @@ const Question = ({ questionId }: { questionId: number }) => {
                   variant="secondary"
                   size="sm"
                   className="gap-2"
-                  onClick={() => append({ id: null, content: "" })}
+                  onClick={() => appendShort({ id: null, content: "" })}
                 >
-                  <Plus className="size-4" />
-                  정답 추가
+                  <Plus className="size-4" /> 정답 추가
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {fields.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-8 text-center text-sm text-muted-foreground bg-slate-50 dark:bg-slate-900 rounded-md border border-dashed">
-                    <p>등록된 정답이 없습니다.</p>
-                  </div>
-                )}
-                {fields.map((field, index) => (
+                {shortAnswerFields.map((field, index) => (
                   <div key={field.id} className="flex items-start gap-3">
                     <span className="flex h-10 w-8 shrink-0 items-center justify-center text-sm font-medium text-muted-foreground bg-muted rounded-md">
                       {index + 1}
@@ -240,10 +277,7 @@ const Question = ({ questionId }: { questionId: number }) => {
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input
-                              {...field}
-                              placeholder={`정답 ${index + 1}`}
-                            />
+                            <Input {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -253,8 +287,7 @@ const Question = ({ questionId }: { questionId: number }) => {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="shrink-0 hover:text-red-500 hover:bg-red-50"
-                      onClick={() => remove(index)}
+                      onClick={() => removeShort(index)}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -264,22 +297,128 @@ const Question = ({ questionId }: { questionId: number }) => {
             </Card>
           )}
 
-          {/* 추후 다른 유형(객관식 등)이 추가될 자리 */}
-          {question.type !== QuestionType.SHORT_ANSWER && (
-            <Card className="bg-slate-50 dark:bg-slate-900/50 border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                <p>현재 단답형 문제 수정만 지원됩니다.</p>
-                <p className="text-sm">
-                  ({question.type} 유형의 정답 수정 UI는 준비 중입니다)
-                </p>
+          {/* 3. 연결형 UI 👈 (새로 추가됨) */}
+          {question.type === QuestionType.MATCHING && (
+            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div className="flex flex-col gap-1">
+                  <CardTitle>보기 쌍 관리 (연결형)</CardTitle>
+                  <CardDescription>
+                    왼쪽 항목과 올바르게 연결될 오른쪽 항목을 입력해주세요.
+                  </CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() =>
+                    appendMatching({
+                      leftItemId: null,
+                      pairingItemId: null,
+                      leftItem: "",
+                      rightItem: "",
+                    })
+                  }
+                >
+                  <Plus className="size-4" />
+                  보기 쌍 추가
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {matchingFields.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center text-sm text-muted-foreground bg-slate-50 dark:bg-slate-900 rounded-md border border-dashed">
+                    <p>등록된 보기 쌍이 없습니다.</p>
+                  </div>
+                )}
+
+                {/* 헤더 (PC 화면에서만 표시) */}
+                {matchingFields.length > 0 && (
+                  <div className="hidden md:flex gap-4 px-10 mb-2 text-sm font-medium text-muted-foreground">
+                    <div className="flex-1">왼쪽 항목</div>
+                    <div className="flex-1">오른쪽 항목 (정답)</div>
+                  </div>
+                )}
+
+                {matchingFields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="flex flex-col md:flex-row items-start md:items-start gap-3 p-3 md:p-0 rounded-lg bg-slate-50 md:bg-transparent dark:bg-slate-900/50 md:dark:bg-transparent"
+                  >
+                    {/* 순서 번호 */}
+                    <span className="flex h-10 w-8 shrink-0 items-center justify-center text-sm font-medium text-muted-foreground bg-white md:bg-muted rounded-md border md:border-none shadow-sm md:shadow-none">
+                      {index + 1}
+                    </span>
+
+                    <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 relative">
+                      {/* 모바일용 연결 아이콘 */}
+                      <div className="md:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-slate-50 dark:bg-slate-900 p-1 rounded-full border">
+                        <ArrowRightLeft className="size-3 text-muted-foreground" />
+                      </div>
+
+                      {/* 왼쪽 항목 */}
+                      <FormField
+                        control={form.control}
+                        name={`answersForMatching.${index}.leftItem`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input {...field} placeholder="왼쪽 항목 입력" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* 오른쪽 항목 */}
+                      <FormField
+                        control={form.control}
+                        name={`answersForMatching.${index}.rightItem`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="오른쪽 항목 입력"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 hover:text-red-500 hover:bg-red-50 self-end md:self-auto"
+                      onClick={() => removeMatching(index)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
 
-          {/* 변경 사항 저장 바 연결 */}
+          {/* 그 외 유형 안내 */}
+          {![QuestionType.SHORT_ANSWER, QuestionType.MATCHING].includes(
+            question.type
+          ) && (
+            <Card className="bg-slate-50 dark:bg-slate-900/50 border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                <p>현재 단답형 및 연결형 문제 수정만 지원됩니다.</p>
+              </CardContent>
+            </Card>
+          )}
+
           <UnsavedChangesBar
             isDirty={isDirty}
-            onSave={form.handleSubmit(onSubmit)}
+            onSave={form.handleSubmit(onSubmit, errors =>
+              console.log("❌ 유효성 검사 실패:", errors)
+            )}
             onReset={() => form.reset()}
             isSaving={isUpdating}
           />

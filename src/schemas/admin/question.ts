@@ -13,6 +13,16 @@ export const adminUpdateQuestionSchema = z.object({
       })
     )
     .optional(),
+  answersForMatching: z
+    .array(
+      z.object({
+        leftItemId: z.number().nullable().optional(), // 기존 ID (없으면 null)
+        pairingItemId: z.number().nullable().optional(), // 기존 ID (없으면 null)
+        leftItem: z.string().min(1, { message: "왼쪽 항목은 필수입니다." }),
+        rightItem: z.string().min(1, { message: "오른쪽 항목은 필수입니다." }),
+      })
+    )
+    .optional(),
 });
 
 export type AdminUpdateQuestionInput = z.infer<
