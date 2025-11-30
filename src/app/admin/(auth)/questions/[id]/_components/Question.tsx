@@ -638,7 +638,7 @@ const Question = ({ questionId }: { questionId: number }) => {
               <CardHeader>
                 <CardTitle>정답 설정 (진위형)</CardTitle>
                 <CardDescription>
-                  정답이 '참(True)'인지 '거짓(False)'인지 선택해주세요.
+                  {"정답이 '참(True)'인지 '거짓(False)'인지 선택해주세요."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
