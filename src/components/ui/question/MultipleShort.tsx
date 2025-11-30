@@ -1,7 +1,6 @@
-import { Button } from "../button";
 import { Input } from "../input";
-import { Separator } from "../separator"; // Separator 추가
-import { useState } from "react";
+import { Separator } from "../separator";
+import { useState, useMemo } from "react"; // useMemo 추가
 import SubmitButton from "./SubmitButton";
 import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
@@ -16,11 +15,23 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
     useQuestionSessionAnswer();
 
-  const placeholders = [...question.matchAll(/\{(\d+)\}/g)];
-  const numInputs = placeholders.length;
+  // 정규식 매칭 결과
+  const placeholders = useMemo(
+    () => [...question.matchAll(/\{(\d+)\}/g)],
+    [question]
+  );
 
+  // [수정 1] 문제에 포함된 모든 인덱스 추출 및 최대 인덱스 계산
+  const indices = useMemo(
+    () => placeholders.map(match => parseInt(match[1])),
+    [placeholders]
+  );
+  const maxIndex = indices.length > 0 ? Math.max(...indices) : -1;
+
+  // [수정 2] 배열 크기를 (최대 인덱스 + 1)로 설정
+  // 예: {0} {0} 이면 maxIndex는 0이므로 배열 길이는 1
   const [answers, setAnswers] = useState(
-    Array.from({ length: numInputs }, () => "")
+    Array.from({ length: maxIndex + 1 }, () => "")
   );
 
   const handleAnswerChange = (index: number, value: string) => {
@@ -35,6 +46,8 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
     e.preventDefault();
 
     await submit({
+      // 값이 있는 항목만 필터링하거나, 백엔드 로직에 맞춰 그대로 전송
+      // 여기서는 인덱스 순서를 유지하며 전송
       answersForMultipleShortAnswer: answers.map((ans, idx) => ({
         orderIndex: Number(idx),
         content: ans.trim(),
@@ -42,12 +55,18 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
     });
   };
 
+  // [수정 3] 유효성 검사 로직 변경
+  // answers 배열 전체가 아니라, '실제로 문제에 존재하는 인덱스(indices)'만 값이 채워졌는지 확인
+  const isFormValid = indices.every(
+    index => answers[index] && answers[index].trim() !== ""
+  );
+
   const renderQuestionWithInputs = () => {
     const parts = [];
     let lastIndex = 0;
 
     placeholders.forEach(match => {
-      const placeholderIndex = parseInt(match[1]); // {0}에서 0 추출
+      const placeholderIndex = parseInt(match[1]);
       const matchIndex = match.index;
 
       if (matchIndex > lastIndex) {
@@ -61,15 +80,14 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
         );
       }
 
-      // 2. 빈칸 (Input 컴포넌트)
       parts.push(
         <Input
-          key={`input-${placeholderIndex}`}
+          // key를 유니크하게 만들기 위해 matchIndex를 포함 (같은 인덱스가 여러번 나올 수 있으므로)
+          key={`input-${placeholderIndex}-${matchIndex}`}
           id={`answer-${placeholderIndex}`}
           type="text"
-          value={answers[placeholderIndex]}
+          value={answers[placeholderIndex] || ""} // undefined 방지
           onChange={e => handleAnswerChange(placeholderIndex, e.target.value)}
-          // 웹뷰 최적화 스타일 적용: 너비를 유연하게, 경계를 깔끔하게
           className="inline-block h-8 min-w-[100px] w-auto mx-1 border-1 border-primary focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-center text-base"
           placeholder={`답변 ${placeholderIndex + 1}`}
         />
@@ -78,7 +96,6 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
       lastIndex = matchIndex + match[0].length;
     });
 
-    // 3. 마지막 빈칸 뒤의 일반 텍스트
     if (lastIndex < question.length) {
       parts.push(
         <span
@@ -108,10 +125,8 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
         <Separator className="mt-2 mb-3" />
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* 문제 영역: Textarea 대신 Input을 포함한 문제 텍스트를 렌더링 */}
           <div
             id="question-area"
-            // 문제 텍스트를 감싸는 영역에 깔끔한 스타일 적용
             className="p-3 leading-relaxed text-lg border-l-4 border-l-muted-foreground/50 bg-muted/20 rounded-md flex flex-wrap items-center"
           >
             {renderQuestionWithInputs()}
@@ -120,7 +135,7 @@ export const QuestionMultipleShort = ({ question }: { question: string }) => {
           <SubmitButton
             isFirst={isFirstQuestion}
             onPrevious={previousQuestion}
-            disabledSubmit={answers.some(ans => ans.trim() === "")}
+            disabledSubmit={!isFormValid}
             loadingSubmit={isLoading}
           />
         </form>

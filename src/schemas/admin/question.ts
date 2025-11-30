@@ -23,6 +23,30 @@ export const adminUpdateQuestionSchema = z.object({
       })
     )
     .optional(),
+
+  answersForCorrectAnswerForTrueFalse: z.boolean().optional(),
+
+  answersForMultipleChoice: z
+    .array(
+      z.object({
+        id: z.number().nullable().optional(), // 기존 ID (없으면 null)
+        content: z.string().min(1, { message: "보기 내용을 입력해주세요." }),
+        isCorrect: z.boolean(), // 정답 여부
+      })
+    )
+    .optional(),
+
+  answersForMultipleShortAnswer: z
+    .array(
+      z.object({
+        id: z.number().nullable().optional(),
+        content: z.string().min(1, { message: "빈칸 정답을 입력해주세요." }),
+        orderIndex: z.number(), // 순서 (0부터 시작)
+      })
+    )
+    .optional(),
+
+  answersForInterview: z.string().optional(),
 });
 
 export type AdminUpdateQuestionInput = z.infer<
