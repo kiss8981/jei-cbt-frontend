@@ -31,8 +31,18 @@ const Questions = () => {
       params.unitIds = unitIds;
     }
 
+    if (store.questionTypeFilter && store.questionTypeFilter.length > 0) {
+      params.questionTypes = store.questionTypeFilter.join(",");
+    }
+
     return params;
-  }, [store.searchQuery, store.unitFilter, store.page, store.pageSize]);
+  }, [
+    store.searchQuery,
+    store.unitFilter,
+    store.page,
+    store.pageSize,
+    store.questionTypeFilter,
+  ]);
 
   const { questions, totalCount, isLoading, error } = useQuestions(apiParams);
 

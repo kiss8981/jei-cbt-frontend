@@ -1,6 +1,15 @@
 import { Expose } from "class-transformer";
-import { QuestionType } from "../../common/question-type.enum";
 import { GetPhotoMappingAdminDto } from "../upload/get-photo-mapping.admin.dto";
+import { QuestionType } from "../../common/question-type.enum";
+
+export type GetQuestionAdminUnionDto =
+  | GetTrueFalseQuestionAdminDto
+  | GetMultipleChoiceQuestionAdminDto
+  | GetMatchingQuestionAdminDto
+  | GetShortAnswerQuestionAdminDto
+  // | GetCompletionQuestionAdminDto
+  | GetMultipleShortAnswerQuestionAdminDto
+  | GetInterviewQuestionAdminDto;
 
 export class GetQuestionAdminDto {
   @Expose()
@@ -22,19 +31,11 @@ export class GetQuestionAdminDto {
   unitName: string;
 
   @Expose()
-  createdAt: Date;
+  photos: GetPhotoMappingAdminDto[];
 
   @Expose()
-  photos: GetPhotoMappingAdminDto[];
+  createdAt: Date;
 }
-export type GetQuestionAdminUnionDto =
-  | GetTrueFalseQuestionAdminDto
-  | GetMultipleChoiceQuestionAdminDto
-  | GetMatchingQuestionAdminDto
-  | GetShortAnswerQuestionAdminDto
-  | GetCompletionQuestionAdminDto
-  | GetMultipleShortAnswerQuestionAdminDto
-  | GetInterviewQuestionAdminDto;
 
 export class GetTrueFalseQuestionAdminDto extends GetQuestionAdminDto {
   @Expose()
@@ -55,10 +56,10 @@ export class GetMultipleChoiceQuestionAdminDto extends GetQuestionAdminDto {
   question: string;
 
   @Expose()
-  choices: { id: number; option: string }[];
+  isMultipleAnswer: boolean; // 다중 정답 여부 서비스단에서 관리 프론트 미사용
 
   @Expose()
-  isMultipleAnswer: boolean;
+  choices: { id: number; content: string; isCorrect: boolean }[];
 }
 
 export class GetMatchingQuestionAdminDto extends GetQuestionAdminDto {
@@ -66,15 +67,9 @@ export class GetMatchingQuestionAdminDto extends GetQuestionAdminDto {
   type: QuestionType.MATCHING;
 
   @Expose()
-  leftItems: {
-    id: number;
-    option: string;
-  }[];
-
-  @Expose()
-  rightItems: {
-    id: number;
-    option: string;
+  items: {
+    leftItem: { id: number; content: string };
+    rightItem: { id: number; content: string };
   }[];
 }
 
@@ -86,16 +81,16 @@ export class GetShortAnswerQuestionAdminDto extends GetQuestionAdminDto {
   question: string;
 
   @Expose()
-  correctAnswers: { id: number; content: string }[];
+  correctAnswers: { id: number; answer: string }[];
 }
 
-export class GetCompletionQuestionAdminDto extends GetQuestionAdminDto {
-  @Expose()
-  type: QuestionType.COMPLETION;
+// export class GetCompletionQuestionAdminDto extends GetQuestionAdminDto {
+//   @Expose()
+//   type: QuestionType.COMPLETION;
 
-  @Expose()
-  question: string; // 네덜란드의 수도는 {0}이고, 프랑스의 수도는 {1}이다.
-}
+//   @Expose()
+//   question: string; // 네덜란드의 수도는 {0}이고, 프랑스의 수도는 {1}이다.
+// }
 
 export class GetMultipleShortAnswerQuestionAdminDto extends GetQuestionAdminDto {
   @Expose()
@@ -103,6 +98,9 @@ export class GetMultipleShortAnswerQuestionAdminDto extends GetQuestionAdminDto 
 
   @Expose()
   question: string; // 네덜란드의 수도는 {0}이고, 프랑스의 수도는 {1}이다.
+
+  @Expose()
+  correctAnswers: { id: number; content: string; orderIndex: number }[];
 }
 
 export class GetInterviewQuestionAdminDto extends GetQuestionAdminDto {
@@ -111,4 +109,7 @@ export class GetInterviewQuestionAdminDto extends GetQuestionAdminDto {
 
   @Expose()
   question: string; // 면접 질문 내용
+
+  @Expose()
+  answer: string;
 }

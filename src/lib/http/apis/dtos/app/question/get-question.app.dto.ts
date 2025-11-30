@@ -6,7 +6,7 @@ export type GetQuestionAppDtoUnion =
   | GetMultipleChoiceQuestionAppDto
   | GetMatchingQuestionAppDto
   | GetShortAnswerQuestionAppDto
-  | GetCompletionQuestionAppDto
+  // | GetCompletionQuestionAppDto
   | GetMultipleShortAnswerQuestionAppDto
   | GetInterviewQuestionAppDto;
 
@@ -77,13 +77,13 @@ export class GetShortAnswerQuestionAppDto extends GetQuestionAppDto {
   question: string;
 }
 
-export class GetCompletionQuestionAppDto extends GetQuestionAppDto {
-  @Expose()
-  type: QuestionType.COMPLETION;
+// export class GetCompletionQuestionAppDto extends GetQuestionAppDto {
+//   @Expose()
+//   type: QuestionType.COMPLETION;
 
-  @Expose()
-  question: string; // 네덜란드의 수도는 {0}이고, 프랑스의 수도는 {1}이다.
-}
+//   @Expose()
+//   question: string; // 네덜란드의 수도는 {0}이고, 프랑스의 수도는 {1}이다.
+// }
 
 export class GetMultipleShortAnswerQuestionAppDto extends GetQuestionAppDto {
   @Expose()
@@ -99,4 +99,7 @@ export class GetInterviewQuestionAppDto extends GetQuestionAppDto {
 
   @Expose()
   question: string; // 면접 질문 내용
+
+  @Expose()
+  answer: string;
 }

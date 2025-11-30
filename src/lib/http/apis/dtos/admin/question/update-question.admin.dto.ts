@@ -10,7 +10,6 @@ import {
   ValidateIf,
   ValidateNested,
 } from "class-validator";
-
 export class UpdateQuestionAdminDto {
   // @IsEnum(QuestionType, { message: '유효하지 않은 문제 유형입니다.' })
   // @IsNotEmpty({ message: '문제 유형은 필수입니다.' })
@@ -33,24 +32,14 @@ export class UpdateQuestionAdminDto {
   @IsString()
   additionalText?: string; // 문제에 대한 추가 정보 (문제 하단 표시)
 
-  // @ValidateIf((o: EditQuestionAdminDto) => o.type == QuestionType.TRUE_FALSE)
-  // @IsBoolean({ message: '정답은 true 또는 false여야 합니다.' })
-  // @IsNotEmpty({ message: '진위형 문제의 정답은 필수입니다.' })
-  // answersForCorrectAnswerForTrueFalse?: boolean; // 진위형 정답
+  @IsOptional()
+  answersForCorrectAnswerForTrueFalse?: boolean; // 진위형 정답
 
-  // @ValidateIf(
-  //   (o: EditQuestionAdminDto) => o.type == QuestionType.MULTIPLE_CHOICE,
-  // )
-  // @IsNotEmpty({ message: '선다형 문제의 보기는 필수입니다.' })
-  // @ValidateNested({ each: true })
-  // @Type(() => CreateQuestionMultipleChoiceAdminDto)
-  // answersForMultipleChoice?: CreateQuestionMultipleChoiceAdminDto[]; // 선다형 보기 목록
+  @IsOptional()
+  answersForMultipleChoice?: CreateQuestionMultipleChoiceAdminDto[]; // 선다형 보기 목록
 
-  // @ValidateIf((o: EditQuestionAdminDto) => o.type == QuestionType.MATCHING)
-  // @IsNotEmpty({ message: '연결형 문제의 보기는 필수입니다.' })
-  // @ValidateNested({ each: true })
-  // @Type(() => CreateQuestionMatchingAdminDto)
-  // answersForMatching?: CreateQuestionMatchingAdminDto[]; // 연결형 보기 목록
+  @IsOptional()
+  answersForMatching?: UpdateQuestionMatchingAdminDto[]; // 연결형 보기 목록
 
   @IsOptional()
   answersForShortAnswers?: UpdateQuestionSortAnswerAdminDto[]; // 단답형 정답 목록
@@ -60,17 +49,11 @@ export class UpdateQuestionAdminDto {
   // @Type(() => CreateQuestionCompletionAdminDto)
   // answersForCompletion?: CreateQuestionCompletionAdminDto[];
 
-  // @ValidateIf(
-  //   (o: EditQuestionAdminDto) => o.type == QuestionType.MULTIPLE_SHORT_ANSWER,
-  // )
-  // @ValidateNested({ each: true })
-  // @Type(() => CreateQuestionMultipleChoiceAnswerAdminDto)
-  // answersForMultipleShortAnswer?: CreateQuestionMultipleChoiceAnswerAdminDto[];
+  @IsOptional()
+  answersForMultipleShortAnswer?: UpdateQuestionMultipleChoiceAnswerAdminDto[];
 
-  // @ValidateIf((o: EditQuestionAdminDto) => o.type == QuestionType.INTERVIEW)
-  // @IsNotEmpty({ message: '면접형 문제의 정답은 필수입니다.' })
-  // @IsString()
-  // answersForInterview?: string; // 면접형 정답
+  @IsOptional()
+  answersForInterview?: string; // 면접형 정답
 }
 
 export class UpdateQuestionSortAnswerAdminDto {
@@ -83,7 +66,11 @@ export class UpdateQuestionSortAnswerAdminDto {
   content: string; // 정답 내용
 }
 
-export class CreateQuestionMultipleChoiceAnswerAdminDto {
+export class UpdateQuestionMultipleChoiceAnswerAdminDto {
+  @IsNumber({}, { message: "정답 ID는 숫자여야 합니다." })
+  @IsOptional()
+  id: number | null; // 정답 ID (기존 정답인 경우에만 필요, 새로 추가하는 정답은 null)
+
   @IsNotEmpty({ message: "정답 내용은 필수입니다." })
   @IsString()
   content: string; // 정답 내용
@@ -92,7 +79,6 @@ export class CreateQuestionMultipleChoiceAnswerAdminDto {
   @IsOptional()
   orderIndex: number; // 빈칸 순서 (0부터 시작)
 }
-
 export class CreateQuestionCompletionAdminDto {
   @IsNotEmpty({ message: "보기 내용은 필수입니다." })
   @IsString()
@@ -103,7 +89,15 @@ export class CreateQuestionCompletionAdminDto {
   isCorrect: boolean; // 정답 여부
 }
 
-export class CreateQuestionMatchingAdminDto {
+export class UpdateQuestionMatchingAdminDto {
+  @IsNumber()
+  @IsOptional()
+  leftItemId: number | null; // 왼쪽 항목 ID (기존 항목인 경우에만 필요, 새로 추가하는 항목은 null)
+
+  @IsNumber()
+  @IsOptional()
+  pairingItemId: number | null; // 짝지어진 오른쪽 항목 ID (기존 항목인 경우에만 필요, 새로 추가하는 항목은 null)
+
   @IsString()
   @IsNotEmpty({ message: "연결형 문제의 왼쪽 항목은 필수입니다." })
   leftItem: string; // 연결형 왼쪽 항목
@@ -114,6 +108,20 @@ export class CreateQuestionMatchingAdminDto {
 }
 
 export class CreateQuestionMultipleChoiceAdminDto {
+  @IsNotEmpty({ message: "보기 내용은 필수입니다." })
+  @IsString()
+  content: string; // 보기 내용
+
+  @IsBoolean({ message: "정답 여부는 true 또는 false여야 합니다." })
+  @IsNotEmpty({ message: "보기의 정답 여부는 필수입니다." })
+  isCorrect: boolean; // 정답 여부 // 여러 개 정답 가능
+}
+
+export class UpdateQuestionMultipleChoiceAdminDto {
+  @IsNumber()
+  @IsOptional()
+  id: number | null; // 보기 ID (기존 보기인 경우에만 필요, 새로 추가하는 보기는 null)
+
   @IsNotEmpty({ message: "보기 내용은 필수입니다." })
   @IsString()
   content: string; // 보기 내용

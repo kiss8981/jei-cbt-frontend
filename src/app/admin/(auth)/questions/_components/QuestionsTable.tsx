@@ -12,6 +12,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { GetQuestionListAdminDto } from "@/lib/http/apis/dtos/admin/question/get-question-list.admin.dto";
 import dayjs from "dayjs";
+import { typeText } from "@/lib/http/apis/dtos/common/question-type.enum";
 interface QuestionTableProps {
   items: GetQuestionListAdminDto[];
   pageNum?: number;
@@ -95,31 +96,10 @@ interface QuestionTableRowProps {
 }
 
 function ReviewTableRow({ item }: QuestionTableRowProps) {
-  const typeText = useMemo(() => {
-    switch (item.type) {
-      case "MULTIPLE_CHOICE":
-        return "객관식";
-      case "MATCHING":
-        return "연결형";
-      case "TRUE_FALSE":
-        return "진위형";
-      case "SHORT_ANSWER":
-        return "단답형";
-      case "COMPLETION":
-        return "완성형";
-      case "MULTIPLE_SHORT_ANSWER":
-        return "복수 단답형";
-      case "INTERVIEW":
-        return "면접형";
-      default:
-        return "-";
-    }
-  }, [item.type]);
-
   return (
     <TableRow key={item.id} className="h-24">
       <TableCell className={COLUMN_STYLES[0]}>{item.id}</TableCell>
-      <TableCell className={COLUMN_STYLES[1]}>{typeText}</TableCell>
+      <TableCell className={COLUMN_STYLES[1]}>{typeText(item.type)}</TableCell>
       <TableCell className={COLUMN_STYLES[2]}>
         <Link
           href={`/admin/questions/${item.id}`}

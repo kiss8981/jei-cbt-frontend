@@ -62,12 +62,12 @@ const QuestionSessionAnswer = () => {
             initialUserAnswer={(questionMap.userAnswer as string) || ""}
           />
         );
-      case QuestionType.COMPLETION:
-        return (
-          <div className="text-sm text-red-500">
-            지원하지 않는 문제 유형입니다.
-          </div>
-        );
+      // case QuestionType.COMPLETION:
+      //   return (
+      //     <div className="text-sm text-red-500">
+      //       지원하지 않는 문제 유형입니다.
+      //     </div>
+      //   );
       default:
         return (
           <div className="text-sm text-red-500">

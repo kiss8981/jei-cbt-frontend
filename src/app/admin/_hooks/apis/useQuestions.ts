@@ -17,6 +17,7 @@ export interface UseQuestionsSearchParams {
   page?: number;
   limit?: number;
   unitIds?: string;
+  questionTypes?: string;
 }
 
 export function useQuestions(searchParams: UseQuestionsSearchParams) {
@@ -29,6 +30,8 @@ export function useQuestions(searchParams: UseQuestionsSearchParams) {
     if (params.page) queryParams.append("page", params.page.toString());
     if (params.limit) queryParams.append("limit", params.limit.toString());
     if (params.unitIds) queryParams.append("unitIds", params.unitIds);
+    if (params.questionTypes)
+      queryParams.append("questionTypes", params.questionTypes);
 
     return queryParams.toString();
   };
