@@ -7,40 +7,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../select";
-import { useState } from "react"; // 상태 관리를 위해 useState 추가
+import { useState } from "react";
 import SubmitButton from "./SubmitButton";
-import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
-import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import ResultDialog from "./ResultDialog";
 import { SubmissionAnswersForMatchingAppDto } from "@/lib/http/apis/dtos/app/question/submission-answer-request.app.dto";
+import ResultDialogByWrong from "./ResultDialogByWrong";
 
 interface MatchingItem {
   id: number;
   option: string;
 }
 
+// 1. 상태 및 액션 타입을 정의 (이전과 동일한 패턴)
+interface QuestionState {
+  isFirstQuestion: boolean;
+  previousQuestion: () => void;
+}
+
+interface QuestionAnswerState {
+  submit: (data: { answersForMatching: any[] }) => Promise<any>;
+  isLoading: boolean;
+  isResultOpen: boolean;
+  result: any;
+  setIsResultOpen: (isOpen: boolean) => void;
+}
+
 interface QuestionMatchingProps {
-  question: string; // 문제의 설명
-  leftItems: MatchingItem[]; // 왼쪽 항목 (연결 대상)
-  rightItems: MatchingItem[]; // 오른쪽 항목 (선택 옵션)
-  // {"answersForMatching": [{"leftItemId": 1289, "rightItemId": 1292}, {"leftItemId": 1291, "rightItemId": 1290}, {"leftItemId": 1293, "rightItemId": 1292}]}
-  initialUserAnswer?: SubmissionAnswersForMatchingAppDto[]; // 초기 사용자 답변 (선택 사항)
+  question?: string;
+  leftItems: MatchingItem[];
+  rightItems: MatchingItem[];
+  initialUserAnswer?: SubmissionAnswersForMatchingAppDto[];
+  // 2. 훅 대신 받을 Props 추가
+  questionState: QuestionState;
+  answerState: QuestionAnswerState;
+  isSession: boolean;
 }
 
 export const QuestionMatching = ({
-  question = "다음 항목들을 바르게 연결하시오.", // 기본값 설정
+  question = "다음 항목들을 바르게 연결하시오.",
   leftItems,
   rightItems,
   initialUserAnswer,
+  questionState,
+  answerState,
+  isSession,
 }: QuestionMatchingProps) => {
-  const {
-    question: questionMap,
-    isFirstQuestion,
-    previousQuestion,
-  } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
-    useQuestionSessionAnswer();
+  // 3. Props에서 로직 분해 할당
+  const { isFirstQuestion, previousQuestion } = questionState;
 
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    answerState;
+
+  // 4. UI 로컬 상태 (선택값 관리)는 그대로 유지
   const [selections, setSelections] = useState<{ [key: number]: number }>(
     () => {
       const initialSelections: { [key: number]: number } = {};
@@ -76,12 +94,22 @@ export const QuestionMatching = ({
   const isSubmitDisabled = Object.keys(selections).length !== leftItems.length;
 
   return (
-    <>
-      <ResultDialog
-        result={result}
-        isResultOpen={isResultOpen}
-        setIsResultOpen={setIsResultOpen}
-      />
+    <div className="w-full h-full relative">
+      {isSession
+        ? isResultOpen && (
+            <ResultDialog
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )
+        : isResultOpen && (
+            <ResultDialogByWrong
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )}
 
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
@@ -91,28 +119,24 @@ export const QuestionMatching = ({
         <Separator className="mt-2 mb-3" />
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* 연결 항목 목록 */}
           <div className="grid gap-6 p-3 border rounded-lg bg-muted/20">
             {leftItems.map(item => (
               <div key={item.id} className="flex items-center justify-between">
-                {/* 왼쪽 항목 텍스트 */}
                 <span className="w-1/3 font-semibold text-base">
                   • {item.option}
                 </span>
 
-                {/* 오른쪽 항목을 선택하는 Select 드롭다운 */}
                 <div className="w-2/3 ml-4">
                   <Select
                     onValueChange={value =>
                       handleSelectChange(item.id, Number(value))
                     }
-                    value={selections[item.id]?.toString()} // 현재 선택된 값
+                    value={selections[item.id]?.toString()}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="항목 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* SelectItem은 오른쪽 항목(rightItems) 전체 목록을 제공 */}
                       {rightItems.map(option => (
                         <SelectItem key={option.id} value={String(option.id)}>
                           {option.option}
@@ -130,9 +154,10 @@ export const QuestionMatching = ({
             onPrevious={previousQuestion}
             disabledSubmit={isSubmitDisabled}
             loadingSubmit={isLoading}
+            isSession={isSession}
           />
         </form>
       </div>
-    </>
+    </div>
   );
 };
