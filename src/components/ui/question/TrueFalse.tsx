@@ -2,28 +2,50 @@ import { useState } from "react";
 import { Separator } from "../separator";
 import { Switch } from "../switch";
 import SubmitButton from "./SubmitButton";
-import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
-import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import ResultDialog from "./ResultDialog";
 import BottomKeypad from "./BottomKeypad";
 import { YesNoSegment } from "./TrueFalseSegment";
+import ResultDialogByWrong from "./ResultDialogByWrong";
+
+// 1. 상태 및 액션 타입 정의 (공통 패턴)
+interface QuestionState {
+  isFirstQuestion: boolean;
+  previousQuestion: () => void;
+}
+
+interface QuestionAnswerState {
+  submit: (data: { answersForTrueFalse: boolean }) => Promise<any>;
+  isLoading: boolean;
+  isResultOpen: boolean;
+  result: any;
+  setIsResultOpen: (isOpen: boolean) => void;
+}
+
+interface QuestionTrueFalseProps {
+  question: string;
+  initialUserAnswer?: boolean;
+  // Hooks 대신 전달받을 상태 객체
+  questionState: QuestionState;
+  answerState: QuestionAnswerState;
+  isSession: boolean;
+}
 
 export const QuestionTrueFalse = ({
   question,
   initialUserAnswer,
-}: {
-  question: string;
-  initialUserAnswer?: boolean;
-}) => {
-  const {
-    question: questionMap,
-    isFirstQuestion,
-    previousQuestion,
-  } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
-    useQuestionSessionAnswer();
+  questionState,
+  answerState,
+  isSession,
+}: QuestionTrueFalseProps) => {
+  // 2. Props에서 로직 분해 할당
+  const { isFirstQuestion, previousQuestion } = questionState;
 
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    answerState;
+
+  // 3. 로컬 상태 관리 (UI 선택값)
   const [checked, setChecked] = useState<boolean>(initialUserAnswer || false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -33,12 +55,22 @@ export const QuestionTrueFalse = ({
   };
 
   return (
-    <>
-      <ResultDialog
-        result={result}
-        isResultOpen={isResultOpen}
-        setIsResultOpen={setIsResultOpen}
-      />
+    <div className="w-full h-full relative">
+      {isSession
+        ? isResultOpen && (
+            <ResultDialog
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )
+        : isResultOpen && (
+            <ResultDialogByWrong
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )}
 
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
@@ -64,10 +96,11 @@ export const QuestionTrueFalse = ({
             isFirst={isFirstQuestion}
             onPrevious={previousQuestion}
             loadingSubmit={isLoading}
+            isSession={isSession}
           />
         </form>
 
-        <BottomKeypad>
+        <BottomKeypad isSession={isSession}>
           <YesNoSegment
             value={checked}
             onChange={setChecked}
@@ -75,6 +108,6 @@ export const QuestionTrueFalse = ({
           />
         </BottomKeypad>
       </div>
-    </>
+    </div>
   );
 };

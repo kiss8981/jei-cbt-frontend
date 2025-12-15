@@ -1,31 +1,44 @@
-import { Button } from "../button";
 import { Separator } from "../separator";
 import { RadioGroup, RadioGroupItem } from "../radio-group";
-import { Checkbox } from "../checkbox"; // Checkbox 컴포넌트 추가
+import { Checkbox } from "../checkbox";
 import { Label } from "../label";
 import React, { useState } from "react";
 import SubmitButton from "./SubmitButton";
-import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
-import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
 import ResultDialog from "./ResultDialog";
 import BottomKeypad from "./BottomKeypad";
 import { MultipleChoiceSegment } from "./MultipleChoiceSegment";
+import ResultDialogByWrong from "./ResultDialogByWrong";
 
-// 옵션 타입
+// 1. 옵션 타입
 interface OptionItem {
   id: number;
   option: string;
 }
 
-// 컴포넌트 Prop 타입
+// 2. 상태 및 액션 타입 정의 (공통 패턴)
+interface QuestionState {
+  isFirstQuestion: boolean;
+  previousQuestion: () => void;
+}
+
+interface QuestionAnswerState {
+  submit: (data: { answersForMultipleChoice: number[] }) => Promise<any>;
+  isLoading: boolean;
+  isResultOpen: boolean;
+  result: any;
+  setIsResultOpen: (isOpen: boolean) => void;
+}
+
+// 3. 컴포넌트 Prop 타입 수정
 interface QuestionChoiceProps {
   question: string;
-  isMultiple: boolean; // 복수 선택 여부 플래그
+  isMultiple: boolean;
   options: OptionItem[];
-  isFirst?: boolean;
-  onClickPrevious?: () => void;
-  onClickNext?: () => void;
-  initialUserAnswer?: number[]; // 초기 사용자 답변 (선택 사항)
+  initialUserAnswer?: number[];
+  // Hooks 대신 전달받을 상태 객체
+  questionState: QuestionState;
+  answerState: QuestionAnswerState;
+  isSession: boolean;
 }
 
 export const QuestionMultipleChoice = ({
@@ -33,25 +46,30 @@ export const QuestionMultipleChoice = ({
   isMultiple,
   options,
   initialUserAnswer,
+  questionState,
+  answerState,
+  isSession,
 }: QuestionChoiceProps) => {
-  const {
-    question: questionMap,
-    isFirstQuestion,
-    previousQuestion,
-  } = useQuestionSessionStore(state => state);
-  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
-    useQuestionSessionAnswer();
+  // 4. Props에서 로직 분해 할당
+  const { isFirstQuestion, previousQuestion } = questionState;
 
-  const [singleSelection, setSingleSelection] = useState<number | null>(
-    isMultiple && initialUserAnswer && initialUserAnswer.length > 0
-      ? null
-      : initialUserAnswer && initialUserAnswer.length > 0
-      ? initialUserAnswer[0]
-      : null
-  ); // 단일 선택 상태
+  const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
+    answerState;
+
+  // 5. 로컬 상태 관리 (UI 선택값)
+  const [singleSelection, setSingleSelection] = useState<number | null>(() => {
+    // 복수 선택 모드이거나 초기값이 여러 개면 단일 선택은 null
+    if (isMultiple && initialUserAnswer && initialUserAnswer.length > 0)
+      return null;
+    // 단일 선택 모드이고 초기값이 있으면 첫 번째 값 사용
+    if (initialUserAnswer && initialUserAnswer.length > 0)
+      return initialUserAnswer[0];
+    return null;
+  });
+
   const [multipleSelections, setMultipleSelections] = useState<number[]>(
     initialUserAnswer || []
-  ); // 복수 선택 상태
+  );
 
   const handleSingleSelect = (id: number) => {
     setSingleSelection(id);
@@ -81,16 +99,26 @@ export const QuestionMultipleChoice = ({
   };
 
   const isSubmitDisabled = isMultiple
-    ? multipleSelections.length === 0 // 복수: 선택된 항목이 없으면 비활성화
-    : singleSelection === null; // 단일: 선택된 항목이 없으면 비활성화
+    ? multipleSelections.length === 0
+    : singleSelection === null;
 
   return (
-    <>
-      <ResultDialog
-        result={result}
-        isResultOpen={isResultOpen}
-        setIsResultOpen={setIsResultOpen}
-      />
+    <div className="w-full h-full relative">
+      {isSession
+        ? isResultOpen && (
+            <ResultDialog
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )
+        : isResultOpen && (
+            <ResultDialogByWrong
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )}
 
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
@@ -108,9 +136,7 @@ export const QuestionMultipleChoice = ({
           <div className="space-y-3">
             {isMultiple ? (
               options.map((optionItem, key) => {
-                const isChecked = (multipleSelections as number[]).includes(
-                  optionItem.id
-                );
+                const isChecked = multipleSelections.includes(optionItem.id);
                 return (
                   <div
                     key={key}
@@ -166,11 +192,12 @@ export const QuestionMultipleChoice = ({
             onPrevious={previousQuestion}
             disabledSubmit={isSubmitDisabled}
             loadingSubmit={isLoading}
+            isSession={isSession}
           />
         </form>
 
         {!isMultiple && (
-          <BottomKeypad>
+          <BottomKeypad isSession={isSession}>
             <MultipleChoiceSegment
               multiple={isMultiple}
               maxSelected={isMultiple ? options.length : 1}
@@ -183,10 +210,10 @@ export const QuestionMultipleChoice = ({
               valuesControlled={multipleSelections}
               onChange={idx => {
                 if (isMultiple) {
+                  // BottomKeypad의 복수 선택 로직이 필요할 경우 구현
+                  // 현재 UI에서는 !isMultiple 조건 때문에 단일 선택 로직만 타게 됩니다.
                   const selectedIdxes = idx as number[];
                   const selectedIds = selectedIdxes.map(i => options[i - 1].id);
-                  alert(`선택된 항목 IDs: ${selectedIds.join(", ")}`);
-
                   setMultipleSelections(selectedIds);
                 } else {
                   handleSingleSelect(options[(idx as number) - 1].id);
@@ -197,6 +224,6 @@ export const QuestionMultipleChoice = ({
           </BottomKeypad>
         )}
       </div>
-    </>
+    </div>
   );
 };

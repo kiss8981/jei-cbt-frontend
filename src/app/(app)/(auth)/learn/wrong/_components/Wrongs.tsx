@@ -24,6 +24,8 @@ import { useQuestionsWrong } from "@/app/(app)/_hooks/useQuestionsWrong";
 import { useInView } from "react-intersection-observer";
 import { GetWrongQuestionListAppDto } from "@/lib/http/apis/dtos/app/question/get-wrong-question-list.app.dto";
 import { CalendarIcon, Target } from "lucide-react"; // 아이콘 추가 (선택사항)
+import useAppRouter from "@/hooks/useAppRouter";
+import { useRouter } from "next/navigation";
 
 const WrongQuestionListPage = () => {
   const [searchParams, setSearchParams] =
@@ -40,6 +42,8 @@ const WrongQuestionListPage = () => {
     threshold: 0,
     rootMargin: "200px",
   });
+  const { navigate } = useAppRouter();
+  const router = useRouter();
 
   const { wrongQuestions, totalCount, isLoading, error } =
     useQuestionsWrong(searchParams);
@@ -201,7 +205,7 @@ const WrongQuestionListPage = () => {
                       size="sm"
                       variant="default"
                       className="h-8 text-xs px-4 rounded-full"
-                      disabled
+                      onClick={() => router.push(`/learn/wrong/${q.id}`)}
                     >
                       학습하기
                     </Button>

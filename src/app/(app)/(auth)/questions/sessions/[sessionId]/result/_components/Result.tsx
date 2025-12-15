@@ -12,13 +12,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  Clock,
+  BookOpen,
+} from "lucide-react";
+import { cn } from "@/lib/utils"; // shadcn의 cn 유틸리티 사용 가정
 
 const QuestionSessionResult = ({ sessionId }: { sessionId: number }) => {
   const { isLoading, result } = useQuestionSessionResult(sessionId);
@@ -26,15 +26,15 @@ const QuestionSessionResult = ({ sessionId }: { sessionId: number }) => {
   if (isLoading) {
     return (
       <div className="h-[85vh] flex items-center justify-center">
-        <Spinner />
+        <Spinner className="w-8 h-8 text-blue-600" />
       </div>
     );
   }
 
-  // result가 null일 경우의 예외 처리 (Optional: API 상태에 따라 추가 필요)
   if (!result) {
     return (
-      <div className="p-4 text-center text-red-500">
+      <div className="p-8 text-center text-gray-500">
+        <XCircle className="w-12 h-12 mx-auto mb-2 text-red-400" />
         세션 결과 데이터를 불러올 수 없습니다.
       </div>
     );
@@ -45,7 +45,6 @@ const QuestionSessionResult = ({ sessionId }: { sessionId: number }) => {
   const wrongAnswers = results.filter(d => d.isCorrect === false).length;
   const unansweredQuestions = totalQuestions - answeredQuestions;
 
-  // 정답률 계산 (totalQuestions 대신 answeredQuestions 기준으로 계산할 수도 있습니다)
   const score =
     totalQuestions > 0
       ? Math.round((correctAnswers / totalQuestions) * 100)
@@ -56,163 +55,193 @@ const QuestionSessionResult = ({ sessionId }: { sessionId: number }) => {
     durationSeconds % 60
   }초`;
 
-  // 정/오답/미응시 상태에 따른 Badge 스타일 반환 함수
-  const getResultBadge = (isCorrect: boolean | null) => {
-    if (isCorrect === true) {
-      return (
-        <Badge className="bg-green-500 hover:bg-green-600 w-16 text-xs justify-center">
-          정답
-        </Badge>
-      );
-    }
-    if (isCorrect === false) {
-      return (
-        <Badge variant="destructive" className="w-16 text-xs justify-center">
-          오답
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="secondary" className="w-16 text-xs justify-center">
-        미응답
-      </Badge>
-    );
-  };
-
   return (
-    <div className="flex flex-col max-w-xl mx-auto p-3 md:p-8 bg-white space-y-6">
-      {/* 1. 세션 결과 요약 카드 (모바일 최적화) */}
-      <Card className="shadow-md border-blue-200">
-        <CardHeader className="text-center p-4">
-          <CardTitle className="text-3xl font-extrabold text-blue-700">
-            {score}점
+    <div className="flex flex-col max-w-lg mx-auto p-4 bg-gray-50/50 min-h-screen space-y-6 pb-20">
+      {/* 1. 상단 점수 및 요약 카드 */}
+      <Card className="border-none shadow-lg bg-white overflow-hidden relative">
+        {/* 상단 장식용 컬러 바 */}
+        <div
+          className={cn(
+            "h-2 w-full absolute top-0 left-0",
+            score >= 80
+              ? "bg-green-500"
+              : score >= 50
+              ? "bg-blue-500"
+              : "bg-red-500"
+          )}
+        />
+
+        <CardHeader className="text-center pb-2 pt-8">
+          <CardTitle className="flex flex-col items-center gap-2">
+            <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+              Total Score
+            </span>
+            <span
+              className={cn(
+                "text-5xl font-extrabold tracking-tight",
+                score >= 80
+                  ? "text-green-600"
+                  : score >= 50
+                  ? "text-blue-600"
+                  : "text-red-600"
+              )}
+            >
+              {score}
+              <span className="text-2xl text-gray-400 ml-1 font-semibold">
+                점
+              </span>
+            </span>
           </CardTitle>
-          <CardDescription className="text-sm text-gray-600 mt-1">
-            총 문항 <span className="font-bold">{totalQuestions}</span>개,{" "}
-            <span className="font-bold text-green-600">{correctAnswers}</span>개
-            정답
+          <CardDescription className="flex items-center justify-center gap-2 mt-2 bg-gray-100 py-1 px-3 rounded-full w-fit mx-auto">
+            <Clock className="w-3 h-3" />
+            <span className="text-xs font-medium">
+              {formattedDuration} 소요
+            </span>
           </CardDescription>
         </CardHeader>
-        {/* 모바일에서는 세로로 분할하여 보기 쉽도록 조정 */}
-        <CardContent className="p-4 pt-0">
-          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-center">
-            {/* 정답/오답/미응답 요약 */}
-            <div className="space-y-1 border-r border-gray-200">
-              <div className="text-xs text-gray-500">정답 / 오답</div>
-              <div className="text-xl font-bold">
-                <span className="text-green-600">{correctAnswers}</span> /{" "}
-                <span className="text-red-600">{wrongAnswers}</span>
-              </div>
-            </div>
-            {/* 전체/응시 시간 */}
-            <div className="space-y-1">
-              <div className="text-xs text-gray-500">응시 시간</div>
-              <div className="text-xl font-bold text-gray-700">
-                {formattedDuration}
-              </div>
-            </div>
 
-            <Separator className="col-span-2 my-2" />
-
-            {/* 응시/미응시 상세 */}
-            <div className="space-y-1 border-r border-gray-200">
-              <div className="text-xs text-gray-500">응시 문항</div>
-              <div className="text-lg font-bold">
-                {answeredQuestions} / {totalQuestions}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-gray-500">미응시</div>
-              <div className="text-lg font-bold text-gray-500">
-                {unansweredQuestions}
-              </div>
-            </div>
+        <CardContent className="p-6 pt-2">
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <StatBox
+              label="정답"
+              value={correctAnswers}
+              icon={<CheckCircle2 className="w-4 h-4 text-green-500" />}
+              bgColor="bg-green-50"
+              textColor="text-green-700"
+            />
+            <StatBox
+              label="오답"
+              value={wrongAnswers}
+              icon={<XCircle className="w-4 h-4 text-red-500" />}
+              bgColor="bg-red-50"
+              textColor="text-red-700"
+            />
+            <StatBox
+              label="미응시"
+              value={unansweredQuestions}
+              icon={<HelpCircle className="w-4 h-4 text-gray-400" />}
+              bgColor="bg-gray-100"
+              textColor="text-gray-600"
+            />
           </div>
         </CardContent>
       </Card>
 
-      <Separator />
+      {/* 2. 문항별 상세 리스트 (카드 형태 변환) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <BookOpen className="w-5 h-5 text-gray-700" />
+          <h2 className="text-lg font-bold text-gray-800">문항별 상세 결과</h2>
+        </div>
 
-      {/* 2. 문항별 상세 결과 목록 (테이블 최적화) */}
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold text-gray-700">
-          🔍 문항별 상세 결과 및 해설
-        </h2>
+        <div className="space-y-3">
+          {results.map((detail, index) => {
+            const isCorrect = detail.isCorrect;
+            const isWrong = isCorrect === false;
 
-        {/* 모바일에서는 가로 스크롤 허용 */}
-        <div className="border rounded-lg overflow-x-scroll">
-          <Table className="min-w-[550px]">
-            {" "}
-            {/* 최소 너비 지정 */}
-            <TableHeader>
-              <TableRow className="text-xs">
-                <TableHead className="w-[40px] p-2">No.</TableHead>
-                <TableHead className="w-[180px] p-2">문항</TableHead>{" "}
-                {/* 제목 영역 확장 */}
-                <TableHead className="text-center w-[70px] p-2">결과</TableHead>
-                <TableHead className="w-[120px] p-2">내 답안</TableHead>
-                <TableHead className="w-[120px] p-2">정답</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="text-sm">
-              {results.map((detail, index) => (
-                <>
-                  <TableRow
-                    key={detail.questionId}
-                    className={
-                      detail.isCorrect === false
-                        ? "bg-red-50 hover:bg-red-100/70"
-                        : detail.isCorrect === true
-                        ? "bg-green-50/50 hover:bg-green-50"
-                        : "bg-gray-50 hover:bg-gray-100/70"
-                    }
-                  >
-                    <TableCell className="font-medium p-2 text-xs">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell className="font-semibold p-2 text-sm whitespace-normal">
-                      {detail.title}
-                    </TableCell>
-                    <TableCell className="text-center p-2">
-                      {getResultBadge(detail.isCorrect)}
-                    </TableCell>
-                    <TableCell
-                      className={
-                        detail.isCorrect === false
-                          ? "text-red-600 font-medium p-2"
-                          : "p-2"
-                      }
-                    >
-                      {detail.userAnswer || "-"}
-                    </TableCell>
-                    <TableCell className="text-green-600 font-medium p-2">
-                      {detail.correctAnswer || "-"}
-                    </TableCell>
-                  </TableRow>
-                  {/* 해설 표시 (오답이거나 해설 데이터가 있을 경우) */}
-                  {(detail.isCorrect === false || detail.explanation) && (
-                    <TableRow className="bg-white border-b-0">
-                      <TableCell
-                        colSpan={5}
-                        className="py-2 px-4 border-t-0 text-xs"
+            return (
+              <Card
+                key={detail.questionId}
+                className={cn(
+                  "border shadow-sm overflow-hidden transition-all",
+                  isCorrect
+                    ? "border-green-200 bg-white"
+                    : isWrong
+                    ? "border-red-200 bg-white"
+                    : "border-gray-200 bg-gray-50"
+                )}
+              >
+                {/* 헤더: 번호, 뱃지, 문제제목 */}
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                      Q{index + 1}
+                    </span>
+                    {isCorrect === true && (
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none">
+                        정답
+                      </Badge>
+                    )}
+                    {isCorrect === false && (
+                      <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-none shadow-none">
+                        오답
+                      </Badge>
+                    )}
+                    {isCorrect === null && (
+                      <Badge className="bg-gray-200 text-gray-600 hover:bg-gray-200 border-none shadow-none">
+                        미응시
+                      </Badge>
+                    )}
+                  </div>
+
+                  <h3 className="text-sm font-semibold text-gray-900 leading-relaxed mb-4">
+                    {detail.title}
+                  </h3>
+
+                  {/* 답안 비교 영역 */}
+                  <div className="flex flex-col gap-2 text-sm bg-gray-50/80 p-3 rounded-lg border border-gray-100">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500 font-medium">
+                        내가 쓴 답
+                      </span>
+                      <span
+                        className={cn(
+                          "font-bold truncate max-w-[70%]",
+                          isWrong
+                            ? "text-red-600 line-through decoration-red-300"
+                            : "text-gray-800"
+                        )}
                       >
-                        <p className="font-bold text-gray-700 mb-1">💡 해설:</p>
-                        <p className="whitespace-pre-wrap text-gray-600 pl-2">
-                          {(detail.explanation &&
-                            detail.explanation.replace(/\r\n/g, "\n")) ||
-                            "제공된 해설이 없습니다."}
-                        </p>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </>
-              ))}
-            </TableBody>
-          </Table>
+                        {detail.userAnswer || "-"}
+                      </span>
+                    </div>
+                    <Separator className="bg-gray-200/50" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-green-600 font-medium">
+                        정답
+                      </span>
+                      <span className="font-bold text-green-700 truncate max-w-[70%]">
+                        {detail.correctAnswer || "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 해설 영역 (오답이거나 해설이 있을 때만 표시) */}
+                {(isWrong || detail.explanation) && (
+                  <div className="bg-slate-50 border-t border-slate-100 p-4">
+                    <div className="flex items-center gap-1 mb-2">
+                      <span className="text-xs font-extrabold text-slate-500 uppercase">
+                        해설
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-700 leading-6 whitespace-pre-wrap">
+                      {detail.explanation
+                        ? detail.explanation.replace(/\r\n/g, "\n")
+                        : "해설 데이터가 없습니다."}
+                    </p>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
         </div>
       </section>
     </div>
   );
 };
+
+// 작은 통계 박스 컴포넌트 분리
+const StatBox = ({ label, value, icon, bgColor, textColor }: any) => (
+  <div
+    className={`flex flex-col items-center justify-center p-3 rounded-xl ${bgColor}`}
+  >
+    <div className="flex items-center gap-1 mb-1 opacity-80">
+      {icon}
+      <span className={`text-xs font-semibold ${textColor}`}>{label}</span>
+    </div>
+    <span className={`text-xl font-bold ${textColor}`}>{value}</span>
+  </div>
+);
 
 export default QuestionSessionResult;

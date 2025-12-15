@@ -1,26 +1,48 @@
-import { Button } from "../button";
-import { Separator } from "../separator"; // Separator 추가
+import { Separator } from "../separator";
 import { Input } from "../input";
 import { useEffect, useRef, useState } from "react";
 import SubmitButton from "./SubmitButton";
-import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession";
-import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import ResultDialog from "./ResultDialog";
+import ResultDialogByWrong from "./ResultDialogByWrong";
+
+// 1. 상태 및 액션 타입 정의
+interface QuestionState {
+  isFirstQuestion: boolean;
+  previousQuestion: () => void;
+}
+
+interface QuestionAnswerState {
+  // 단답형은 문자열 하나를 보냄
+  submit: (data: { answersForShortAnswer: string }) => Promise<any>;
+  isLoading: boolean;
+  isResultOpen: boolean;
+  result: any;
+  setIsResultOpen: (isOpen: boolean) => void;
+}
+
+interface QuestionShortAnswerProps {
+  question: string;
+  initialUserAnswer?: string;
+  // Hooks 대신 전달받을 상태 객체
+  questionState: QuestionState;
+  answerState: QuestionAnswerState;
+  isSession: boolean;
+}
 
 export const QuestionShortAnswer = ({
   question,
   initialUserAnswer,
-}: {
-  question: string;
-  initialUserAnswer?: string;
-}) => {
-  const {
-    question: questionMap,
-    isFirstQuestion,
-    previousQuestion,
-  } = useQuestionSessionStore(state => state);
+  questionState,
+  answerState,
+  isSession,
+}: QuestionShortAnswerProps) => {
+  // 2. Props에서 로직 분해 할당
+  const { isFirstQuestion, previousQuestion } = questionState;
+
   const { submit, isLoading, isResultOpen, result, setIsResultOpen } =
-    useQuestionSessionAnswer();
+    answerState;
+
+  // 3. UI 로직 (포커스 및 스크롤) - UI 관련이므로 여기에 유지
   const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -33,7 +55,9 @@ export const QuestionShortAnswer = ({
     }
   }, [input]);
 
+  // 4. 로컬 상태 관리
   const [answer, setAnswer] = useState(initialUserAnswer || "");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -43,12 +67,23 @@ export const QuestionShortAnswer = ({
   };
 
   return (
-    <>
-      <ResultDialog
-        result={result}
-        isResultOpen={isResultOpen}
-        setIsResultOpen={setIsResultOpen}
-      />
+    <div className="w-full h-full relative">
+      {isSession
+        ? isResultOpen && (
+            <ResultDialog
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )
+        : isResultOpen && (
+            <ResultDialogByWrong
+              result={result}
+              isResultOpen={isResultOpen}
+              setIsResultOpen={setIsResultOpen}
+            />
+          )}
+
       <div className="bg-background mx-auto w-full">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
           {question}
@@ -57,7 +92,6 @@ export const QuestionShortAnswer = ({
         <Separator className="mt-2 mb-3" />
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* 2. 답변 입력 영역 */}
           <div className="grid w-full gap-1.5">
             <Input
               ref={input}
@@ -75,9 +109,10 @@ export const QuestionShortAnswer = ({
             onPrevious={previousQuestion}
             disabledSubmit={answer.trim() === ""}
             loadingSubmit={isLoading}
+            isSession={isSession}
           />
         </form>
       </div>
-    </>
+    </div>
   );
 };
