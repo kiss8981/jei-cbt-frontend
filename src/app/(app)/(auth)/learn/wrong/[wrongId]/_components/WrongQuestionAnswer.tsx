@@ -7,6 +7,7 @@ import {
 import { QuestionInterview } from "@/components/ui/question/Interview";
 import { QuestionMatching } from "@/components/ui/question/Matching";
 import { QuestionMultipleChoice } from "@/components/ui/question/MultipleChoice";
+import { QuestionMultipleChoiceInput } from "@/components/ui/question/MultipleChoiceInput";
 import { QuestionMultipleShort } from "@/components/ui/question/MultipleShort";
 import { QuestionShortAnswer } from "@/components/ui/question/ShortAnswer";
 import { QuestionTrueFalse } from "@/components/ui/question/TrueFalse";
@@ -65,6 +66,20 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
       case QuestionType.MULTIPLE_CHOICE:
         return (
           <QuestionMultipleChoice
+            question={question.question}
+            options={question.choices}
+            isMultiple={question.isMultipleAnswer}
+            questionState={{
+              isFirstQuestion: true,
+              previousQuestion: () => {},
+            }}
+            answerState={answerState}
+            isSession={false}
+          />
+        );
+      case QuestionType.MULTIPLE_CHOICE_INPUT:
+        return (
+          <QuestionMultipleChoiceInput
             question={question.question}
             options={question.choices}
             isMultiple={question.isMultipleAnswer}

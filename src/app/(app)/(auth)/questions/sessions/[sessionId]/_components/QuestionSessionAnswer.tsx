@@ -2,6 +2,7 @@ import { useQuestionSessionAnswer } from "@/app/(app)/_hooks/useQuestionSession"
 import { QuestionInterview } from "@/components/ui/question/Interview";
 import { QuestionMatching } from "@/components/ui/question/Matching";
 import { QuestionMultipleChoice } from "@/components/ui/question/MultipleChoice";
+import { QuestionMultipleChoiceInput } from "@/components/ui/question/MultipleChoiceInput";
 import { QuestionMultipleShort } from "@/components/ui/question/MultipleShort";
 import { QuestionShortAnswer } from "@/components/ui/question/ShortAnswer";
 import { QuestionTrueFalse } from "@/components/ui/question/TrueFalse";
@@ -68,6 +69,19 @@ const QuestionSessionAnswer = () => {
             options={question.choices}
             isMultiple={question.isMultipleAnswer}
             initialUserAnswer={(userAnswer as number[]) || []}
+            questionState={questionState}
+            answerState={answerState}
+            isSession
+          />
+        );
+      case QuestionType.MULTIPLE_CHOICE_INPUT:
+        return (
+          <QuestionMultipleChoiceInput
+            key={questionKey}
+            question={question.question}
+            options={question.choices}
+            isMultiple={question.isMultipleAnswer}
+            initialUserAnswer={(userAnswer as string) || ""}
             questionState={questionState}
             answerState={answerState}
             isSession

@@ -98,6 +98,7 @@ const SelectQuestionTypes = ({
               .filter(
                 type =>
                   type === QuestionType.MULTIPLE_CHOICE ||
+                  type === QuestionType.MULTIPLE_CHOICE_INPUT ||
                   type === QuestionType.TRUE_FALSE ||
                   type === QuestionType.SHORT_ANSWER ||
                   type === QuestionType.INTERVIEW ||
@@ -126,7 +127,9 @@ const SelectQuestionTypes = ({
                     htmlFor={type}
                     className="text-lg font-medium select-none"
                   >
-                    {type === QuestionType.MULTIPLE_CHOICE
+                    {type === QuestionType.MULTIPLE_CHOICE_INPUT
+                      ? "선다형(보기입력)"
+                      : type === QuestionType.MULTIPLE_CHOICE
                       ? "객관식"
                       : type === QuestionType.TRUE_FALSE
                       ? "OX 문제"
