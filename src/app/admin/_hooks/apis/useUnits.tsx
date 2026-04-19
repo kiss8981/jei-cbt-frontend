@@ -66,6 +66,7 @@ export const uesUnitUpdate = (unit: GetUnitAdminDto) => {
         {
           name: updatedUnit?.name,
           isDisplayed: updatedUnit?.isDisplayed,
+          examId: updatedUnit?.examId ?? null,
         }
       );
 

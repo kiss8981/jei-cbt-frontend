@@ -50,7 +50,9 @@ export class GetTrueFalseQuestionAdminDto extends GetQuestionAdminDto {
 
 export class GetMultipleChoiceQuestionAdminDto extends GetQuestionAdminDto {
   @Expose()
-  type: QuestionType.MULTIPLE_CHOICE;
+  type:
+    | QuestionType.MULTIPLE_CHOICE
+    | QuestionType.MULTIPLE_CHOICE_INPUT;
 
   @Expose()
   question: string;

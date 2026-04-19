@@ -7,12 +7,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SetStateAction, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { GetUnitAdminDto } from "@/lib/http/apis/dtos/admin/question/get-unit.admin.dto";
 import { uesUnitUpdate } from "@/app/admin/_hooks/apis/useUnits";
 import { Button } from "@/components/ui/button";
 import { UnitUpdateModal } from "./UnitUpdateModal";
+
 interface UnitTableProps {
   items: GetUnitAdminDto[];
   pageNum?: number;
@@ -20,11 +21,12 @@ interface UnitTableProps {
   isLoading?: boolean;
 }
 
-const TABLE_HEADERS = ["ID", "단위 이름", "표시여부", "수정"] as const;
+const TABLE_HEADERS = ["ID", "능력단위", "시험", "표시여부", "수정"] as const;
 
 const COLUMN_STYLES = [
   "bg-accent align-top w-8",
   "align-top w-24",
+  "bg-accent align-top w-40",
   "bg-accent align-top w-24",
   "align-top w-24",
 ] as const;
@@ -53,9 +55,12 @@ function LoadingTableBody() {
             <Skeleton className="h-4 w-24" />
           </TableCell>
           <TableCell className={COLUMN_STYLES[2]}>
-            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-32" />
           </TableCell>
           <TableCell className={COLUMN_STYLES[3]}>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell className={COLUMN_STYLES[4]}>
             <Skeleton className="h-8 w-16" />
           </TableCell>
         </TableRow>
@@ -70,7 +75,7 @@ function EmptyTableBody() {
       <TableRow>
         <TableCell
           colSpan={TABLE_HEADERS.length}
-          className="text-center py-8 text-muted-foreground"
+          className="py-8 text-center text-muted-foreground"
         >
           일치하는 데이터가 없습니다.
         </TableCell>
@@ -79,16 +84,11 @@ function EmptyTableBody() {
   );
 }
 
-interface UnitTableRowProps {
-  item: GetUnitAdminDto;
-  index: number;
-  baseIndex: number;
-}
-
-function UnitTableRow({ item }: UnitTableRowProps) {
+function UnitTableRow({ item }: { item: GetUnitAdminDto }) {
   const [openModal, setOpenModal] = useState(false);
   const { handleUpdate, updatedUnit, setUpdatedUnit, isLoading } =
     uesUnitUpdate(item);
+
   return (
     <>
       <UnitUpdateModal
@@ -103,18 +103,17 @@ function UnitTableRow({ item }: UnitTableRowProps) {
         isLoading={isLoading}
       />
 
-      <TableRow key={item.id} className="h-24">
+      <TableRow className="h-24">
         <TableCell className={COLUMN_STYLES[0]}>{item.id}</TableCell>
         <TableCell className={COLUMN_STYLES[1]}>{item.name}</TableCell>
         <TableCell className={COLUMN_STYLES[2]}>
-          {item.isDisplayed ? "표시" : "숨김"}
+          {item.examTitle ? `${item.examTitle} (${item.examType})` : "-"}
         </TableCell>
         <TableCell className={COLUMN_STYLES[3]}>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setOpenModal(true)}
-          >
+          {item.isDisplayed ? "표시" : "숨김"}
+        </TableCell>
+        <TableCell className={COLUMN_STYLES[4]}>
+          <Button variant="outline" size="sm" onClick={() => setOpenModal(true)}>
             수정
           </Button>
         </TableCell>
@@ -123,22 +122,11 @@ function UnitTableRow({ item }: UnitTableRowProps) {
   );
 }
 
-function DataTableBody({
-  items,
-  baseIndex,
-}: {
-  items: GetUnitAdminDto[];
-  baseIndex: number;
-}) {
+function DataTableBody({ items }: { items: GetUnitAdminDto[] }) {
   return (
     <TableBody>
-      {items.map((item, idx) => (
-        <UnitTableRow
-          key={item.id}
-          item={item}
-          index={idx}
-          baseIndex={baseIndex}
-        />
+      {items.map(item => (
+        <UnitTableRow key={item.id} item={item} />
       ))}
     </TableBody>
   );
@@ -150,20 +138,15 @@ export function UnitsTable({
   perPage,
   isLoading = false,
 }: UnitTableProps) {
-  const baseIndex = useMemo(() => {
-    const effectivePerPage = perPage ?? (items?.length || 5);
-    return (Math.max(pageNum, 1) - 1) * effectivePerPage;
-  }, [pageNum, perPage, items?.length]);
-
   const tableBody = useMemo(() => {
     if (isLoading) return <LoadingTableBody />;
     if (!items?.length) return <EmptyTableBody />;
-    return <DataTableBody items={items} baseIndex={baseIndex} />;
-  }, [isLoading, items, baseIndex]);
+    return <DataTableBody items={items} />;
+  }, [isLoading, items, pageNum, perPage]);
 
   return (
-    <Card className="p-0 m-0">
-      <Table className="rounded-xl overflow-hidden">
+    <Card className="m-0 p-0">
+      <Table className="overflow-hidden rounded-xl">
         <TableHeaderRow />
         {tableBody}
       </Table>

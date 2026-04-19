@@ -14,6 +14,7 @@ export const useUnits = (searchParams: GetUnitListQueryAppDto) => {
       queryParams.append("keyword", params.keyword.toString());
     if (params.page) queryParams.append("page", params.page.toString());
     if (params.limit) queryParams.append("limit", params.limit.toString());
+    if (params.examId) queryParams.append("examId", params.examId.toString());
 
     return queryParams.toString();
   };

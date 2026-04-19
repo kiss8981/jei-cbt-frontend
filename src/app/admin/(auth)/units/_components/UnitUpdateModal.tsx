@@ -15,7 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { useExams } from "@/app/admin/_hooks/apis/useExams";
 import { GetUnitAdminDto } from "@/lib/http/apis/dtos/admin/question/get-unit.admin.dto";
+
 export function UnitUpdateModal({
   open,
   onOpenChange,
@@ -31,6 +33,8 @@ export function UnitUpdateModal({
   onSubmit: () => void;
   isLoading: boolean;
 }) {
+  const { exams, isLoading: isExamsLoading } = useExams({ page: 1, limit: 100 });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -51,7 +55,39 @@ export function UnitUpdateModal({
           />
 
           <Select
-            // 제어 컴포넌트: defaultValue 제거
+            value={unit?.examId ? unit.examId.toString() : "NONE"}
+            onValueChange={value =>
+              onChangeUnit(prev => {
+                if (!prev) return prev;
+
+                const selectedExam =
+                  value === "NONE"
+                    ? null
+                    : exams.find(exam => exam.id === Number(value)) ?? null;
+
+                return {
+                  ...prev,
+                  examId: selectedExam?.id ?? null,
+                  examTitle: selectedExam?.title ?? null,
+                  examType: selectedExam?.type ?? null,
+                };
+              })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="시험 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="NONE">시험 미지정</SelectItem>
+              {exams.map(exam => (
+                <SelectItem key={exam.id} value={exam.id.toString()}>
+                  {exam.title} ({exam.type})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
             value={unit?.isDisplayed ? "ACTIVE" : "INACTIVE"}
             onValueChange={value =>
               onChangeUnit(prev =>
@@ -67,6 +103,12 @@ export function UnitUpdateModal({
               <SelectItem value="INACTIVE">비활성</SelectItem>
             </SelectContent>
           </Select>
+
+          {isExamsLoading && (
+            <div className="text-xs text-muted-foreground">
+              시험 목록을 불러오는 중입니다.
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2 sm:gap-3">

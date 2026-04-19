@@ -1,28 +1,28 @@
 export enum QuestionType {
-  TRUE_FALSE = "TRUE_FALSE", // 진위형 (참/거짓) ㅇㅇ
-  MULTIPLE_CHOICE = "MULTIPLE_CHOICE", // 선다형 ㅇㅇ
-  MATCHING = "MATCHING", // 연결형 ㅇㅇ
-  SHORT_ANSWER = "SHORT_ANSWER", // 순수 단답형 ㅇㅇ
-  // COMPLETION = "COMPLETION", // 빈칸 채우기 (완성형)
-  MULTIPLE_SHORT_ANSWER = "MULTIPLE_SHORT_ANSWER", // 복수 단답형
-  INTERVIEW = "INTERVIEW", // 면접 질문
+  TRUE_FALSE = "TRUE_FALSE",
+  MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
+  MULTIPLE_CHOICE_INPUT = "MULTIPLE_CHOICE_INPUT",
+  MATCHING = "MATCHING",
+  SHORT_ANSWER = "SHORT_ANSWER",
+  MULTIPLE_SHORT_ANSWER = "MULTIPLE_SHORT_ANSWER",
+  INTERVIEW = "INTERVIEW",
 }
 
 export const typeText = (type: QuestionType) => {
   switch (type) {
-    case "MULTIPLE_CHOICE":
+    case QuestionType.MULTIPLE_CHOICE:
       return "객관식";
-    case "MATCHING":
+    case QuestionType.MULTIPLE_CHOICE_INPUT:
+      return "선다형(보기입력)";
+    case QuestionType.MATCHING:
       return "연결형";
-    case "TRUE_FALSE":
+    case QuestionType.TRUE_FALSE:
       return "진위형";
-    case "SHORT_ANSWER":
+    case QuestionType.SHORT_ANSWER:
       return "단답형";
-    // case "COMPLETION":
-    //   return "완성형";
-    case "MULTIPLE_SHORT_ANSWER":
+    case QuestionType.MULTIPLE_SHORT_ANSWER:
       return "복수 단답형";
-    case "INTERVIEW":
+    case QuestionType.INTERVIEW:
       return "면접형";
     default:
       return "-";

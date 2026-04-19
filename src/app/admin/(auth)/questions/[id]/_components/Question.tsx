@@ -188,7 +188,9 @@ const Question = ({ questionId }: { questionId: number }) => {
 
       // 4. 선다형 매핑
       const multipleChoiceAnswers =
-        question.type === QuestionType.MULTIPLE_CHOICE && question.choices
+        (question.type === QuestionType.MULTIPLE_CHOICE ||
+          question.type === QuestionType.MULTIPLE_CHOICE_INPUT) &&
+        question.choices
           ? question.choices.map((choice: any) => ({
               id: Number(choice.id),
               content: choice.content,
@@ -260,7 +262,8 @@ const Question = ({ questionId }: { questionId: number }) => {
 
       // 선다형
       answersForMultipleChoice:
-        question?.type === QuestionType.MULTIPLE_CHOICE
+        (question?.type === QuestionType.MULTIPLE_CHOICE ||
+          question?.type === QuestionType.MULTIPLE_CHOICE_INPUT)
           ? values.answersForMultipleChoice?.map(ans => ({
               id: ans.id ?? null,
               content: ans.content,
@@ -310,7 +313,8 @@ const Question = ({ questionId }: { questionId: number }) => {
               "면접 질문과 모범 답안을 관리합니다."}
             {question.type === QuestionType.MULTIPLE_SHORT_ANSWER &&
               "빈칸 채우기 문제의 질문과 정답을 관리합니다."}
-            {question.type === QuestionType.MULTIPLE_CHOICE &&
+            {(question.type === QuestionType.MULTIPLE_CHOICE ||
+              question.type === QuestionType.MULTIPLE_CHOICE_INPUT) &&
               "선다형 문제의 보기와 정답을 관리합니다."}
             {question.type === QuestionType.TRUE_FALSE &&
               "진위형(O/X) 문제의 정답을 설정합니다."}
@@ -548,7 +552,8 @@ const Question = ({ questionId }: { questionId: number }) => {
           )}
 
           {/* 3. 선다형(객관식) UI */}
-          {question.type === QuestionType.MULTIPLE_CHOICE && (
+          {(question.type === QuestionType.MULTIPLE_CHOICE ||
+            question.type === QuestionType.MULTIPLE_CHOICE_INPUT) && (
             <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <div className="flex flex-col gap-1">

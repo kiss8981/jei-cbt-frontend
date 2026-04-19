@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { GetUnitListAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list.app.dto";
 import { useUnits } from "@/app/(app)/_hooks/useUnits";
 import { GetUnitListQueryAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list-query.app.dto";
-import useAppRouter from "@/hooks/useAppRouter";
 import { useQuestionSessionByUnitId } from "@/app/(app)/_hooks/useQuestionSession";
-import { Button, FixedButton } from "@/components/ui/button";
+import { FixedButton } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
+import { useSelectedExamGuard } from "@/app/(app)/_hooks/useSelectedExamGuard";
 
 const ITEMS_PER_PAGE = 10;
 const INITIAL_PAGE = 1;
@@ -32,20 +32,20 @@ const UnitItem: React.FC<UnitItemProps> = ({
 }) => {
   return (
     <div
-      className={cn("p-4 bg-background")}
+      className={cn("bg-background p-4")}
       onClick={() => handleSelect(unit.id)}
       style={{ cursor: "pointer" }}
       data-testid={`unit-item-${unit.id}`}
     >
       <div className={cn("flex flex-row items-center justify-between")}>
-        <h3 className="text-lg font-semibold w-52 text-gray-800 dark:text-gray-100 whitespace-pre-wrap truncate">
+        <h3 className="w-52 truncate whitespace-pre-wrap text-lg font-semibold text-gray-800 dark:text-gray-100">
           {unit.name}
         </h3>
         {selected && (
           <Check
             className="text-green-500"
             size={20}
-            aria-label="선택됨"
+            aria-label="selected"
             data-testid="selected-icon"
           />
         )}
@@ -56,13 +56,9 @@ const UnitItem: React.FC<UnitItemProps> = ({
 };
 
 export const UnitsLoadingSkeleton = () => (
-  <div className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative px-4 space-y-2">
+  <div className="relative h-screen w-full space-y-2 overflow-y-auto bg-white px-4 dark:bg-gray-900">
     {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
-      <div
-        key={i}
-        className="flex flex-col space-y-2"
-        data-testid="unit-skeleton"
-      >
+      <div key={i} className="flex flex-col space-y-2" data-testid="unit-skeleton">
         <Skeleton className="h-10 w-full bg-gray-200" />
       </div>
     ))}
@@ -86,18 +82,18 @@ const SelectQuestionTypes = ({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.2 }}
-      className="w-full bg-white  relative"
+      className="relative w-full bg-white"
     >
       <div className="flex flex-col items-start px-4">
-        <h2 className="text-2xl font-semibold">풀고 싶은</h2>
-        <h2 className="text-2xl font-semibold">문제 유형이 있나요?</h2>
-        {/* input */}
-        <div className="flex flex-row w-full mt-22 relative">
-          <div className="flex flex-col w-full space-y-4 my-8">
+        <h2 className="text-2xl font-semibold">문제 유형 선택</h2>
+        <h2 className="text-2xl font-semibold">원하는 문제를 골라주세요</h2>
+        <div className="relative mt-22 flex w-full flex-row">
+          <div className="my-8 flex w-full flex-col space-y-4">
             {Object.values(QuestionType)
               .filter(
                 type =>
                   type === QuestionType.MULTIPLE_CHOICE ||
+                  type === QuestionType.MULTIPLE_CHOICE_INPUT ||
                   type === QuestionType.TRUE_FALSE ||
                   type === QuestionType.SHORT_ANSWER ||
                   type === QuestionType.INTERVIEW ||
@@ -105,10 +101,7 @@ const SelectQuestionTypes = ({
                   type === QuestionType.MULTIPLE_SHORT_ANSWER
               )
               .map(type => (
-                <div
-                  key={type}
-                  className="flex flex-row items-center space-x-4"
-                >
+                <div key={type} className="flex flex-row items-center space-x-4">
                   <input
                     type="checkbox"
                     id={type}
@@ -120,25 +113,24 @@ const SelectQuestionTypes = ({
                         setQuestionTypes(questionTypes.filter(t => t !== type));
                       }
                     }}
-                    className="w-5 h-5"
+                    className="h-5 w-5"
                   />
-                  <label
-                    htmlFor={type}
-                    className="text-lg font-medium select-none"
-                  >
-                    {type === QuestionType.MULTIPLE_CHOICE
-                      ? "객관식"
-                      : type === QuestionType.TRUE_FALSE
-                      ? "OX 문제"
-                      : type === QuestionType.SHORT_ANSWER
-                      ? "단답형"
-                      : type == QuestionType.INTERVIEW
-                      ? "면접형"
-                      : type == QuestionType.MATCHING
-                      ? "연결형"
-                      : type == QuestionType.MULTIPLE_SHORT_ANSWER
-                      ? "빈칸 채우기"
-                      : "기타"}
+                  <label htmlFor={type} className="select-none text-lg font-medium">
+                    {type === QuestionType.MULTIPLE_CHOICE_INPUT
+                      ? "객관식(보기입력)"
+                      : type === QuestionType.MULTIPLE_CHOICE
+                        ? "객관식"
+                        : type === QuestionType.TRUE_FALSE
+                          ? "OX 문제"
+                          : type === QuestionType.SHORT_ANSWER
+                            ? "단답형"
+                            : type == QuestionType.INTERVIEW
+                              ? "면접형"
+                              : type == QuestionType.MATCHING
+                                ? "연결형"
+                                : type == QuestionType.MULTIPLE_SHORT_ANSWER
+                                  ? "빈칸 채우기"
+                                  : "기타"}
                   </label>
                 </div>
               ))}
@@ -160,10 +152,12 @@ const SelectUnit = ({
 }: {
   handleNext: (unitId: number) => void;
 }) => {
+  const { examId, hydrated, hasSelectedExam } = useSelectedExamGuard();
   const [allUnits, setAllUnits] = useState<GetUnitListAppDto[]>([]);
   const [searchParams, setSearchParams] = useState<GetUnitListQueryAppDto>({
     page: INITIAL_PAGE,
     limit: ITEMS_PER_PAGE,
+    examId: examId ?? undefined,
   });
   const [hasMore, setHasMore] = useState(true);
   const { units, totalCount, isLoading, error } = useUnits(searchParams);
@@ -173,6 +167,16 @@ const SelectUnit = ({
     threshold: 0,
     rootMargin: "200px",
   });
+
+  useEffect(() => {
+    setAllUnits([]);
+    setHasMore(true);
+    setSearchParams({
+      page: INITIAL_PAGE,
+      limit: ITEMS_PER_PAGE,
+      examId: examId ?? undefined,
+    });
+  }, [examId]);
 
   useEffect(() => {
     if ((units as GetUnitListAppDto[]).length > 0) {
@@ -186,7 +190,7 @@ const SelectUnit = ({
         setHasMore(false);
       }
     }
-  }, [units, totalCount]);
+  }, [units, totalCount, allUnits]);
 
   useEffect(() => {
     if (inView && !isLoading && hasMore) {
@@ -196,6 +200,10 @@ const SelectUnit = ({
       }));
     }
   }, [inView, isLoading, hasMore]);
+
+  if (!hydrated || !hasSelectedExam) {
+    return <UnitsLoadingSkeleton />;
+  }
 
   if (isLoading && allUnits.length === 0) {
     return <UnitsLoadingSkeleton />;
@@ -217,20 +225,17 @@ const SelectUnit = ({
           />
         ))}
 
-        {/* 무한 스크롤 트리거 & 로딩 인디케이터 */}
         {hasMore && (
           <div ref={ref} className="p-4 text-center">
-            {/* 로딩 중일 때만 스켈레톤 표시 */}
             {isLoading && <UnitsLoadingSkeleton />}
             {!isLoading && (
               <p className="text-sm text-muted-foreground">
-                스크롤하여 더 많은 항목을 불러오세요.
+                스크롤하면 더 많은 항목을 불러옵니다.
               </p>
             )}
           </div>
         )}
 
-        {/* 모든 데이터 로드 완료 메시지 */}
         {!hasMore && allUnits.length > 0 && (
           <div className="p-4 text-center">
             <p className="text-sm text-gray-500">
@@ -239,7 +244,6 @@ const SelectUnit = ({
           </div>
         )}
 
-        {/* 데이터가 아예 없는 경우 */}
         {allUnits.length === 0 && !isLoading && (
           <div className="p-8 text-center text-muted-foreground">
             <p>검색 결과가 없습니다.</p>
@@ -250,7 +254,7 @@ const SelectUnit = ({
       <FixedButton
         size="lg"
         disabled={!selectedUnitId}
-        onClick={async () => {
+        onClick={() => {
           if (selectedUnitId) {
             handleNext(selectedUnitId);
           }
@@ -274,6 +278,7 @@ const Unit = () => {
     setQuestionTypes,
     questionTypes,
   } = useQuestionSessionByUnitId();
+
   return (
     <div className="flex flex-col bg-white">
       <AnimatePresence initial={false} mode="wait">
@@ -286,9 +291,9 @@ const Unit = () => {
             }}
           />
         )}
-        {type === "SELECT_QUESTION_TYPES" && ( // ➡️ 조건부 렌더링
+        {type === "SELECT_QUESTION_TYPES" && (
           <SelectQuestionTypes
-            key="SELECT_QUESTION_COUNT"
+            key="SELECT_QUESTION_TYPES"
             handleNext={handleCreate}
             setQuestionTypes={setQuestionTypes}
             questionTypes={questionTypes}

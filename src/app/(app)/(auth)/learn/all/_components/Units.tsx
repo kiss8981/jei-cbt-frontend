@@ -1,21 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { GetUnitListAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list.app.dto";
 import { useUnits } from "@/app/(app)/_hooks/useUnits";
 import { GetUnitListQueryAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list-query.app.dto";
-import useAppRouter from "@/hooks/useAppRouter";
-import {
-  useQuestionSessionByAll,
-  useQuestionSessionByUnitId,
-} from "@/app/(app)/_hooks/useQuestionSession";
-import { Button, FixedButton, TwoFixedButton } from "@/components/ui/button";
+import { useQuestionSessionByAll } from "@/app/(app)/_hooks/useQuestionSession";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import { TwoFixedButton } from "@/components/ui/button";
+import { useSelectedExamGuard } from "@/app/(app)/_hooks/useSelectedExamGuard";
 
 const ITEMS_PER_PAGE = 10;
 const INITIAL_PAGE = 1;
@@ -33,20 +30,20 @@ const UnitItem: React.FC<UnitItemProps> = ({
 }) => {
   return (
     <div
-      className={cn("p-4 bg-background")}
+      className={cn("bg-background p-4")}
       onClick={() => handleSelect(unit.id)}
       style={{ cursor: "pointer" }}
       data-testid={`unit-item-${unit.id}`}
     >
       <div className={cn("flex flex-row items-center justify-between")}>
-        <h3 className="text-lg font-semibold w-52 text-gray-800 dark:text-gray-100 whitespace-pre-wrap truncate">
+        <h3 className="w-52 truncate whitespace-pre-wrap text-lg font-semibold text-gray-800 dark:text-gray-100">
           {unit.name}
         </h3>
         {selected && (
           <Check
             className="text-green-500"
             size={20}
-            aria-label="선택됨"
+            aria-label="selected"
             data-testid="selected-icon"
           />
         )}
@@ -57,13 +54,9 @@ const UnitItem: React.FC<UnitItemProps> = ({
 };
 
 export const UnitsLoadingSkeleton = () => (
-  <div className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative px-4 space-y-2">
+  <div className="relative h-screen w-full space-y-2 overflow-y-auto bg-white px-4 dark:bg-gray-900">
     {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
-      <div
-        key={i}
-        className="flex flex-col space-y-2"
-        data-testid="unit-skeleton"
-      >
+      <div key={i} className="flex flex-col space-y-2" data-testid="unit-skeleton">
         <Skeleton className="h-10 w-full bg-gray-200" />
       </div>
     ))}
@@ -71,10 +64,12 @@ export const UnitsLoadingSkeleton = () => (
 );
 
 const Units = () => {
+  const { examId, hydrated, hasSelectedExam } = useSelectedExamGuard();
   const [allUnits, setAllUnits] = useState<GetUnitListAppDto[]>([]);
   const [searchParams, setSearchParams] = useState<GetUnitListQueryAppDto>({
     page: INITIAL_PAGE,
     limit: ITEMS_PER_PAGE,
+    examId: examId ?? undefined,
   });
   const [hasMore, setHasMore] = useState(true);
   const { units, totalCount, isLoading, error } = useUnits(searchParams);
@@ -88,6 +83,17 @@ const Units = () => {
   });
 
   useEffect(() => {
+    setAllUnits([]);
+    setSelectedUnitIds([]);
+    setHasMore(true);
+    setSearchParams({
+      page: INITIAL_PAGE,
+      limit: ITEMS_PER_PAGE,
+      examId: examId ?? undefined,
+    });
+  }, [examId]);
+
+  useEffect(() => {
     if ((units as GetUnitListAppDto[]).length > 0) {
       const newUnits = (units as GetUnitListAppDto[]).filter(
         (unit: GetUnitListAppDto) =>
@@ -99,7 +105,7 @@ const Units = () => {
         setHasMore(false);
       }
     }
-  }, [units, totalCount]);
+  }, [units, totalCount, allUnits]);
 
   useEffect(() => {
     if (inView && !isLoading && hasMore) {
@@ -110,6 +116,10 @@ const Units = () => {
     }
   }, [inView, isLoading, hasMore]);
 
+  if (!hydrated || !hasSelectedExam) {
+    return <UnitsLoadingSkeleton />;
+  }
+
   if (isLoading && allUnits.length === 0) {
     return <UnitsLoadingSkeleton />;
   }
@@ -119,7 +129,7 @@ const Units = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative">
+    <div className="relative h-screen w-full overflow-y-auto bg-white dark:bg-gray-900">
       <div className="p-0">
         {allUnits.map(unit => (
           <UnitItem
@@ -129,29 +139,26 @@ const Units = () => {
               setSelectedUnitIds(prevSelected => {
                 if (prevSelected.includes(unitId)) {
                   return prevSelected.filter(id => id !== unitId);
-                } else {
-                  return [...prevSelected, unitId];
                 }
+
+                return [...prevSelected, unitId];
               });
             }}
             selected={selectedUnitIds.includes(unit.id)}
           />
         ))}
 
-        {/* 무한 스크롤 트리거 & 로딩 인디케이터 */}
         {hasMore && (
           <div ref={ref} className="p-4 text-center">
-            {/* 로딩 중일 때만 스켈레톤 표시 */}
             {isLoading && <UnitsLoadingSkeleton />}
             {!isLoading && (
               <p className="text-sm text-muted-foreground">
-                스크롤하여 더 많은 항목을 불러오세요.
+                스크롤하면 더 많은 항목을 불러옵니다.
               </p>
             )}
           </div>
         )}
 
-        {/* 모든 데이터 로드 완료 메시지 */}
         {!hasMore && allUnits.length > 0 && (
           <div className="p-4 text-center">
             <p className="text-sm text-gray-500">
@@ -160,7 +167,6 @@ const Units = () => {
           </div>
         )}
 
-        {/* 데이터가 아예 없는 경우 */}
         {allUnits.length === 0 && !isLoading && (
           <div className="p-8 text-center text-muted-foreground">
             <p>검색 결과가 없습니다.</p>
@@ -170,7 +176,7 @@ const Units = () => {
 
       <TwoFixedButton
         left={{
-          children: selectedUnitIds.length > 0 ? `전체 선택 해제` : "전체 선택",
+          children: selectedUnitIds.length > 0 ? "전체 선택 해제" : "전체 선택",
           props: {
             variant: "outline",
             onClick: () => {
@@ -184,7 +190,7 @@ const Units = () => {
         }}
         right={{
           children: isCreateSessionLoading ? (
-            <Spinner className="w-5 h-5" />
+            <Spinner className="h-5 w-5" />
           ) : (
             "시작"
           ),
