@@ -1,21 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { GetUnitListAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list.app.dto";
 import { useUnits } from "@/app/(app)/_hooks/useUnits";
 import { GetUnitListQueryAppDto } from "@/lib/http/apis/dtos/app/unit/get-unit-list-query.app.dto";
-import {
-  useQuestionSessionByAll,
-  useQuestionSessionByMock,
-} from "@/app/(app)/_hooks/useQuestionSession";
+import { useQuestionSessionByMock } from "@/app/(app)/_hooks/useQuestionSession";
 import { FixedButton, TwoFixedButton } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSelectedExamGuard } from "@/app/(app)/_hooks/useSelectedExamGuard";
 
 const ITEMS_PER_PAGE = 10;
 const INITIAL_PAGE = 1;
@@ -33,20 +31,20 @@ const UnitItem: React.FC<UnitItemProps> = ({
 }) => {
   return (
     <div
-      className={cn("p-4 bg-background")}
+      className={cn("bg-background p-4")}
       onClick={() => handleSelect(unit.id)}
       style={{ cursor: "pointer" }}
       data-testid={`unit-item-${unit.id}`}
     >
       <div className={cn("flex flex-row items-center justify-between")}>
-        <h3 className="text-lg font-semibold w-52 text-gray-800 dark:text-gray-100 whitespace-pre-wrap truncate">
+        <h3 className="w-52 truncate whitespace-pre-wrap text-lg font-semibold text-gray-800 dark:text-gray-100">
           {unit.name}
         </h3>
         {selected && (
           <Check
             className="text-green-500"
             size={20}
-            aria-label="선택됨"
+            aria-label="selected"
             data-testid="selected-icon"
           />
         )}
@@ -57,13 +55,9 @@ const UnitItem: React.FC<UnitItemProps> = ({
 };
 
 export const UnitsLoadingSkeleton = () => (
-  <div className="h-screen w-full bg-white dark:bg-gray-900 overflow-y-auto relative px-4 space-y-2">
+  <div className="relative h-screen w-full space-y-2 overflow-y-auto bg-white px-4 dark:bg-gray-900">
     {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
-      <div
-        key={i}
-        className="flex flex-col space-y-2"
-        data-testid="unit-skeleton"
-      >
+      <div key={i} className="flex flex-col space-y-2" data-testid="unit-skeleton">
         <Skeleton className="h-10 w-full bg-gray-200" />
       </div>
     ))}
@@ -71,10 +65,12 @@ export const UnitsLoadingSkeleton = () => (
 );
 
 const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
+  const { examId, hydrated, hasSelectedExam } = useSelectedExamGuard();
   const [allUnits, setAllUnits] = useState<GetUnitListAppDto[]>([]);
   const [searchParams, setSearchParams] = useState<GetUnitListQueryAppDto>({
     page: INITIAL_PAGE,
     limit: ITEMS_PER_PAGE,
+    examId: examId ?? undefined,
   });
   const [hasMore, setHasMore] = useState(true);
   const { units, totalCount, isLoading, error } = useUnits(searchParams);
@@ -84,6 +80,17 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
     threshold: 0,
     rootMargin: "200px",
   });
+
+  useEffect(() => {
+    setAllUnits([]);
+    setSelectedUnitIds([]);
+    setHasMore(true);
+    setSearchParams({
+      page: INITIAL_PAGE,
+      limit: ITEMS_PER_PAGE,
+      examId: examId ?? undefined,
+    });
+  }, [examId]);
 
   useEffect(() => {
     if ((units as GetUnitListAppDto[]).length > 0) {
@@ -97,7 +104,7 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
         setHasMore(false);
       }
     }
-  }, [units, totalCount]);
+  }, [units, totalCount, allUnits]);
 
   useEffect(() => {
     if (inView && !isLoading && hasMore) {
@@ -107,6 +114,10 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
       }));
     }
   }, [inView, isLoading, hasMore]);
+
+  if (!hydrated || !hasSelectedExam) {
+    return <UnitsLoadingSkeleton />;
+  }
 
   if (isLoading && allUnits.length === 0) {
     return <UnitsLoadingSkeleton />;
@@ -122,7 +133,7 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.2 }}
-      className="w-full bg-white dark:bg-gray-900 min-h-screen"
+      className="min-h-screen w-full bg-white dark:bg-gray-900"
     >
       <div className="p-0">
         {allUnits.map(unit => (
@@ -133,29 +144,26 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
               setSelectedUnitIds(prevSelected => {
                 if (prevSelected.includes(unitId)) {
                   return prevSelected.filter(id => id !== unitId);
-                } else {
-                  return [...prevSelected, unitId];
                 }
+
+                return [...prevSelected, unitId];
               });
             }}
             selected={selectedUnitIds.includes(unit.id)}
           />
         ))}
 
-        {/* 무한 스크롤 트리거 & 로딩 인디케이터 */}
         {hasMore && (
           <div ref={ref} className="p-4 text-center">
-            {/* 로딩 중일 때만 스켈레톤 표시 */}
             {isLoading && <UnitsLoadingSkeleton />}
             {!isLoading && (
               <p className="text-sm text-muted-foreground">
-                스크롤하여 더 많은 항목을 불러오세요.
+                스크롤하면 더 많은 항목을 불러옵니다.
               </p>
             )}
           </div>
         )}
 
-        {/* 모든 데이터 로드 완료 메시지 */}
         {!hasMore && allUnits.length > 0 && (
           <div className="p-4 text-center">
             <p className="text-sm text-gray-500">
@@ -164,7 +172,6 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
           </div>
         )}
 
-        {/* 데이터가 아예 없는 경우 */}
         {allUnits.length === 0 && !isLoading && (
           <div className="p-8 text-center text-muted-foreground">
             <p>검색 결과가 없습니다.</p>
@@ -174,7 +181,7 @@ const Unit = ({ handleNext }: { handleNext: (unitIds: number[]) => void }) => {
 
       <TwoFixedButton
         left={{
-          children: selectedUnitIds.length > 0 ? `전체 선택 해제` : "전체 선택",
+          children: selectedUnitIds.length > 0 ? "전체 선택 해제" : "전체 선택",
           props: {
             variant: "outline",
             onClick: () => {
@@ -215,23 +222,22 @@ const QuestionCount = ({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.2 }}
-      className="w-full bg-white  relative"
+      className="relative w-full bg-white"
     >
       <div className="flex flex-col items-start px-4">
         <h2 className="text-2xl font-semibold">몇 문제를</h2>
-        <h2 className="text-2xl font-semibold">풀고 싶으신가요?</h2>
-        {/* input */}
-        <div className="flex flex-row w-full mt-22 relative">
+        <h2 className="text-2xl font-semibold">출제할까요?</h2>
+        <div className="relative mt-22 flex w-full flex-row">
           <input
             type="number"
             min={1}
             max={100}
             value={count}
             onChange={e => setCount(Number(e.target.value))}
-            className="w-full py-2 border-b outline-0"
+            className="w-full border-b py-2 outline-0"
             data-testid="question-count-input"
           />
-          <p className="ml-2 mt-2 text-gray-600 dark:text-gray-300 min-w-fit absolute right-0 bottom-2.5">
+          <p className="absolute bottom-2.5 right-0 ml-2 min-w-fit text-gray-600 dark:text-gray-300">
             문제
           </p>
         </div>
@@ -270,7 +276,7 @@ const MockUnit = () => {
             }}
           />
         )}
-        {type === "SELECT_QUESTION_COUNT" && ( // ➡️ 조건부 렌더링
+        {type === "SELECT_QUESTION_COUNT" && (
           <QuestionCount
             key="SELECT_QUESTION_COUNT"
             handleNext={handleCreate}

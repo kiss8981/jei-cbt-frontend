@@ -9,4 +9,13 @@ export class GetUnitAdminDto {
 
   @Expose()
   isDisplayed: boolean;
+
+  @Expose()
+  examId: number | null;
+
+  @Expose()
+  examType: string | null;
+
+  @Expose()
+  examTitle: string | null;
 }

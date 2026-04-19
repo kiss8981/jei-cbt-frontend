@@ -1,5 +1,9 @@
 export const SidebarItems = {
   "문제 관리": {
+    "시험 관리": {
+      path: "/admin/exams",
+      activePaths: ["/admin/exams"],
+    },
     "능력 단위": {
       path: "/admin/units",
       activePaths: ["/admin/units"],
