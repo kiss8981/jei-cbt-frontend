@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { useExams } from "@/app/admin/_hooks/apis/useExams";
 import { GetUnitAdminDto } from "@/lib/http/apis/dtos/admin/question/get-unit.admin.dto";
+import { ExamMultiSelect } from "./ExamMultiSelect";
 
 export function UnitUpdateModal({
   open,
@@ -33,64 +33,47 @@ export function UnitUpdateModal({
   onSubmit: () => void;
   isLoading: boolean;
 }) {
-  const { exams, isLoading: isExamsLoading } = useExams({ page: 1, limit: 100 });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>능력 단위 수정</DialogTitle>
+          <DialogTitle>단원 수정</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <Input
             type="text"
             value={unit?.name ?? ""}
-            onChange={e =>
-              onChangeUnit(prev =>
+            onChange={(e) =>
+              onChangeUnit((prev) =>
                 prev ? { ...prev, name: e.target.value } : prev
               )
             }
-            placeholder="능력 단위 이름"
+            placeholder="단원명"
+          />
+
+          <ExamMultiSelect
+            initialValue={unit?.examIds.map((examId) => examId.toString()) ?? []}
+            selectedExams={unit?.exams ?? []}
+            onExamChange={(examIds) =>
+              onChangeUnit((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      examIds: examIds.map((examId) => Number(examId)),
+                      exams: prev.exams.filter((exam) =>
+                        examIds.includes(exam.id.toString())
+                      ),
+                    }
+                  : prev
+              )
+            }
           />
 
           <Select
-            value={unit?.examId ? unit.examId.toString() : "NONE"}
-            onValueChange={value =>
-              onChangeUnit(prev => {
-                if (!prev) return prev;
-
-                const selectedExam =
-                  value === "NONE"
-                    ? null
-                    : exams.find(exam => exam.id === Number(value)) ?? null;
-
-                return {
-                  ...prev,
-                  examId: selectedExam?.id ?? null,
-                  examTitle: selectedExam?.title ?? null,
-                  examType: selectedExam?.type ?? null,
-                };
-              })
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="시험 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="NONE">시험 미지정</SelectItem>
-              {exams.map(exam => (
-                <SelectItem key={exam.id} value={exam.id.toString()}>
-                  {exam.title} ({exam.type})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
             value={unit?.isDisplayed ? "ACTIVE" : "INACTIVE"}
-            onValueChange={value =>
-              onChangeUnit(prev =>
+            onValueChange={(value) =>
+              onChangeUnit((prev) =>
                 prev ? { ...prev, isDisplayed: value === "ACTIVE" } : prev
               )
             }
@@ -99,16 +82,10 @@ export function UnitUpdateModal({
               <SelectValue placeholder="상태 선택" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ACTIVE">활성</SelectItem>
-              <SelectItem value="INACTIVE">비활성</SelectItem>
+              <SelectItem value="ACTIVE">표시</SelectItem>
+              <SelectItem value="INACTIVE">숨김</SelectItem>
             </SelectContent>
           </Select>
-
-          {isExamsLoading && (
-            <div className="text-xs text-muted-foreground">
-              시험 목록을 불러오는 중입니다.
-            </div>
-          )}
         </div>
 
         <DialogFooter className="gap-2 sm:gap-3">

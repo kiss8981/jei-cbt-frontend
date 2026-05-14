@@ -107,7 +107,9 @@ function UnitTableRow({ item }: { item: GetUnitAdminDto }) {
         <TableCell className={COLUMN_STYLES[0]}>{item.id}</TableCell>
         <TableCell className={COLUMN_STYLES[1]}>{item.name}</TableCell>
         <TableCell className={COLUMN_STYLES[2]}>
-          {item.examTitle ? `${item.examTitle} (${item.examType})` : "-"}
+          {item.exams.length > 0
+            ? item.exams.map((exam) => `${exam.title} (${exam.type})`).join(", ")
+            : "-"}
         </TableCell>
         <TableCell className={COLUMN_STYLES[3]}>
           {item.isDisplayed ? "표시" : "숨김"}

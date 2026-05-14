@@ -1,5 +1,16 @@
 import { Expose } from "class-transformer";
 
+export class UnitExamSummaryDto {
+  @Expose()
+  id: number;
+
+  @Expose()
+  title: string;
+
+  @Expose()
+  type: string;
+}
+
 export class GetUnitAdminDto {
   @Expose()
   id: number;
@@ -11,11 +22,8 @@ export class GetUnitAdminDto {
   isDisplayed: boolean;
 
   @Expose()
-  examId: number | null;
+  examIds: number[];
 
   @Expose()
-  examType: string | null;
-
-  @Expose()
-  examTitle: string | null;
+  exams: UnitExamSummaryDto[];
 }

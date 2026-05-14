@@ -8,5 +8,5 @@ export class GetUnitListAppDto {
   name: string;
 
   @Expose()
-  examId: number | null;
+  examIds: number[];
 }
