@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const adminUpdateQuestionSchema = z.object({
+  unitId: z.number().optional(),
   title: z.string().min(1, { message: "문제 제목은 필수입니다." }),
   explanation: z.string().optional(),
   additionalText: z.string().optional(),

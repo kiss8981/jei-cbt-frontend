@@ -1,15 +1,7 @@
-import { IsNumberString, IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { QuestionType } from "../../common/question-type.enum";
 
-export class GetQuestionListQueryAdminDto {
-  @IsOptional()
-  @IsNumberString()
-  page: number = 1;
-
-  @IsOptional()
-  @IsNumberString()
-  limit: number = 40;
-
+export class ExportQuestionListQueryAdminDto {
   @IsOptional()
   @IsString({ each: true })
   unitIds?: number[];
