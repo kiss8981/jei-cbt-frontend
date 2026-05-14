@@ -171,6 +171,7 @@ const SelectUnit = ({
   useEffect(() => {
     setAllUnits([]);
     setHasMore(true);
+    setUnitId(null);
     setSearchParams({
       page: INITIAL_PAGE,
       limit: ITEMS_PER_PAGE,
@@ -179,18 +180,33 @@ const SelectUnit = ({
   }, [examId]);
 
   useEffect(() => {
-    if ((units as GetUnitListAppDto[]).length > 0) {
-      const newUnits = (units as GetUnitListAppDto[]).filter(
-        (unit: GetUnitListAppDto) =>
-          !allUnits.some(existingUnit => existingUnit.id === unit.id)
+    const incomingUnits = units as GetUnitListAppDto[];
+
+    if (incomingUnits.length === 0) {
+      return;
+    }
+
+    setAllUnits(prev => {
+      const newUnits = incomingUnits.filter(
+        (unit) => !prev.some((existingUnit) => existingUnit.id === unit.id)
       );
 
-      setAllUnits(prev => [...prev, ...newUnits]);
-      if (allUnits.length + newUnits.length >= totalCount && totalCount > 0) {
+      if (newUnits.length === 0) {
+        if (totalCount > 0 && prev.length >= totalCount) {
+          setHasMore(false);
+        }
+        return prev;
+      }
+
+      const nextUnits = [...prev, ...newUnits];
+
+      if (totalCount > 0 && nextUnits.length >= totalCount) {
         setHasMore(false);
       }
-    }
-  }, [units, totalCount, allUnits]);
+
+      return nextUnits;
+    });
+  }, [units, totalCount]);
 
   useEffect(() => {
     if (inView && !isLoading && hasMore) {

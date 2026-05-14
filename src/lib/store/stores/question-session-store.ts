@@ -14,6 +14,7 @@ export interface QuestionSessionState {
 
 interface QuestionSessionActions {
   nextQuestion: (initialLastQuestionMapId?: number) => Promise<void>;
+  currentQuestion: () => Promise<void>;
   previousQuestion: () => Promise<void>;
 }
 
@@ -36,7 +37,7 @@ const buildQuery = (questionMapId?: number) => {
 };
 
 export const createQuestionSessionStore = (
-  initState: QuestionSessionState = initialQuestionSessionState
+  initState: QuestionSessionState = initialQuestionSessionState,
 ) => {
   return createStore<QuestionSessionStore>((set, get) => ({
     ...initState,
@@ -46,7 +47,7 @@ export const createQuestionSessionStore = (
 
         const { session, question } = get();
         const suffix = buildQuery(
-          initialLastQuestionMapId ?? question?.questionMapId
+          initialLastQuestionMapId ?? question?.questionMapId,
         );
         const { data } = await http.get<
           BaseResponse<GetQuestionWithStepAppDto>
@@ -69,6 +70,31 @@ export const createQuestionSessionStore = (
         }
 
         set({ question: data.data });
+      } catch (error: any) {
+        toast.error(error.message);
+      } finally {
+        set({ isQuestionLoading: false });
+      }
+    },
+
+    currentQuestion: async () => {
+      try {
+        set({ isQuestionLoading: true });
+
+        const { session } = get();
+        const { data } = await http.get<
+          BaseResponse<GetQuestionWithStepAppDto>
+        >(`/questions/sessions/${session.id}/current`);
+
+        if (data.code !== 200) {
+          throw new Error(data.message || "현재 문제 불러오기에 실패했습니다.");
+        }
+
+        set({
+          isFirstQuestion: data.data.previousQuestionCount === 0,
+          hasMoreQuestions: !data.data.isLastQuestion,
+          question: data.data,
+        });
       } catch (error: any) {
         toast.error(error.message);
       } finally {

@@ -6,7 +6,9 @@ import { motion } from "framer-motion";
 import { BookOpen, Timer } from "lucide-react";
 
 const AllQuestionSessionIndex = () => {
-  const { session, nextQuestion } = useQuestionSessionStore(state => state);
+  const { session, nextQuestion, currentQuestion } = useQuestionSessionStore(
+    state => state
+  );
 
   if (!session || session.type !== "ALL") return null;
 
@@ -50,11 +52,12 @@ const AllQuestionSessionIndex = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  nextQuestion(
-                    session.lastQuestionMapId
-                      ? session.lastQuestionMapId
-                      : undefined
-                  );
+                  if (session.lastQuestionMapId) {
+                    currentQuestion();
+                    return;
+                  }
+
+                  nextQuestion();
                 }}
                 className="w-full"
               >
