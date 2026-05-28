@@ -18,6 +18,15 @@ import { useSelectedExamGuard } from "@/app/(app)/_hooks/useSelectedExamGuard";
 
 const ITEMS_PER_PAGE = 10;
 const INITIAL_PAGE = 1;
+const SUPPORTED_QUESTION_TYPES = [
+  QuestionType.MULTIPLE_CHOICE,
+  QuestionType.MULTIPLE_CHOICE_INPUT,
+  QuestionType.TRUE_FALSE,
+  QuestionType.SHORT_ANSWER,
+  QuestionType.INTERVIEW,
+  QuestionType.MATCHING,
+  QuestionType.MULTIPLE_SHORT_ANSWER,
+] as const;
 
 interface UnitItemProps {
   unit: GetUnitListAppDto;
@@ -68,14 +77,20 @@ export const UnitsLoadingSkeleton = () => (
 const SelectQuestionTypes = ({
   setQuestionTypes,
   questionTypes,
+  availableQuestionTypes,
   isLoading,
   handleNext,
 }: {
   questionTypes: QuestionType[];
   setQuestionTypes: (questionTypes: QuestionType[]) => void;
+  availableQuestionTypes: QuestionType[];
   isLoading: boolean;
   handleNext: () => void;
 }) => {
+  const selectableQuestionTypes = SUPPORTED_QUESTION_TYPES.filter((type) =>
+    availableQuestionTypes.includes(type)
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -89,18 +104,7 @@ const SelectQuestionTypes = ({
         <h2 className="text-2xl font-semibold">원하는 문제를 골라주세요</h2>
         <div className="relative mt-22 flex w-full flex-row">
           <div className="my-8 flex w-full flex-col space-y-4">
-            {Object.values(QuestionType)
-              .filter(
-                type =>
-                  type === QuestionType.MULTIPLE_CHOICE ||
-                  type === QuestionType.MULTIPLE_CHOICE_INPUT ||
-                  type === QuestionType.TRUE_FALSE ||
-                  type === QuestionType.SHORT_ANSWER ||
-                  type === QuestionType.INTERVIEW ||
-                  type === QuestionType.MATCHING ||
-                  type === QuestionType.MULTIPLE_SHORT_ANSWER
-              )
-              .map(type => (
+            {selectableQuestionTypes.map(type => (
                 <div key={type} className="flex flex-row items-center space-x-4">
                   <input
                     type="checkbox"
@@ -134,6 +138,11 @@ const SelectQuestionTypes = ({
                   </label>
                 </div>
               ))}
+            {selectableQuestionTypes.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                선택한 단원에 등록된 문제 유형이 없습니다.
+              </p>
+            )}
           </div>
         </div>
         <FixedButton
@@ -150,7 +159,7 @@ const SelectQuestionTypes = ({
 const SelectUnit = ({
   handleNext,
 }: {
-  handleNext: (unitId: number) => void;
+  handleNext: (unit: GetUnitListAppDto) => void;
 }) => {
   const { examId, hydrated, hasSelectedExam } = useSelectedExamGuard();
   const [allUnits, setAllUnits] = useState<GetUnitListAppDto[]>([]);
@@ -271,8 +280,10 @@ const SelectUnit = ({
         size="lg"
         disabled={!selectedUnitId}
         onClick={() => {
-          if (selectedUnitId) {
-            handleNext(selectedUnitId);
+          const selectedUnit = allUnits.find((unit) => unit.id === selectedUnitId);
+
+          if (selectedUnit) {
+            handleNext(selectedUnit);
           }
         }}
         data-testid="start-quiz-button"
@@ -287,6 +298,9 @@ const Unit = () => {
   const [type, setType] = useState<"SELECT_UNIT" | "SELECT_QUESTION_TYPES">(
     "SELECT_UNIT"
   );
+  const [selectedUnitQuestionTypes, setSelectedUnitQuestionTypes] = useState<
+    QuestionType[]
+  >([]);
   const {
     handleCreate,
     isLoading: isCreateSessionLoading,
@@ -301,8 +315,10 @@ const Unit = () => {
         {type === "SELECT_UNIT" && (
           <SelectUnit
             key="SELECT_UNIT"
-            handleNext={(selectedUnitId: number) => {
-              setUnitId(selectedUnitId);
+            handleNext={(selectedUnit) => {
+              setUnitId(selectedUnit.id);
+              setQuestionTypes([]);
+              setSelectedUnitQuestionTypes(selectedUnit.questionTypes ?? []);
               setType("SELECT_QUESTION_TYPES");
             }}
           />
@@ -313,6 +329,7 @@ const Unit = () => {
             handleNext={handleCreate}
             setQuestionTypes={setQuestionTypes}
             questionTypes={questionTypes}
+            availableQuestionTypes={selectedUnitQuestionTypes}
             isLoading={isCreateSessionLoading}
           />
         )}
