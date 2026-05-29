@@ -1,6 +1,20 @@
 import { Expose } from "class-transformer";
 import { QuestionType } from "../../common/question-type.enum";
 
+export class GetQuestionPhotoAppDto {
+  @Expose()
+  id: number;
+
+  @Expose()
+  key: string;
+
+  @Expose()
+  originalFileName?: string;
+
+  @Expose()
+  orderIndex?: number;
+}
+
 export type GetQuestionAppDtoUnion =
   | GetTrueFalseQuestionAppDto
   | GetMultipleChoiceQuestionAppDto
@@ -19,6 +33,9 @@ export class GetQuestionAppDto {
 
   @Expose()
   additionalText: string;
+
+  @Expose()
+  photos: GetQuestionPhotoAppDto[];
 
   @Expose()
   unitId: number;
