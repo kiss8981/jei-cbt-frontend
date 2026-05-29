@@ -1,5 +1,4 @@
 import { Button } from "../button";
-import { Separator } from "../separator";
 import {
   Select,
   SelectContent,
@@ -12,6 +11,7 @@ import SubmitButton from "./SubmitButton";
 import ResultDialog from "./ResultDialog";
 import { SubmissionAnswersForMatchingAppDto } from "@/lib/http/apis/dtos/app/question/submission-answer-request.app.dto";
 import ResultDialogByWrong from "./ResultDialogByWrong";
+import { QuestionPhoto, QuestionPrompt } from "./QuestionPrompt";
 
 interface MatchingItem {
   id: number;
@@ -34,6 +34,8 @@ interface QuestionAnswerState {
 
 interface QuestionMatchingProps {
   question?: string;
+  additionalText?: string | null;
+  photos?: QuestionPhoto[] | null;
   leftItems: MatchingItem[];
   rightItems: MatchingItem[];
   initialUserAnswer?: SubmissionAnswersForMatchingAppDto[];
@@ -45,6 +47,8 @@ interface QuestionMatchingProps {
 
 export const QuestionMatching = ({
   question = "다음 항목들을 바르게 연결하시오.",
+  additionalText,
+  photos,
   leftItems,
   rightItems,
   initialUserAnswer,
@@ -112,11 +116,11 @@ export const QuestionMatching = ({
           )}
 
       <div className="bg-background mx-auto w-full">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
-          {question}
-        </h2>
-
-        <Separator className="mt-2 mb-3" />
+        <QuestionPrompt
+          question={question}
+          additionalText={additionalText}
+          photos={photos}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-6 p-3 border rounded-lg bg-muted/20">

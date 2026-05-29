@@ -29,6 +29,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionTrueFalse
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             questionState={{
               isFirstQuestion: true,
               previousQuestion: () => {},
@@ -41,6 +43,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionInterview
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             questionState={{
               isFirstQuestion: true,
               previousQuestion: () => {},
@@ -53,6 +57,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionMatching
             question={question.title}
+            additionalText={question.additionalText}
+            photos={question.photos}
             leftItems={question.leftItems}
             rightItems={question.rightItems}
             questionState={{
@@ -67,6 +73,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionMultipleChoice
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             options={question.choices}
             isMultiple={question.isMultipleAnswer}
             questionState={{
@@ -81,6 +89,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionMultipleChoiceInput
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             options={question.choices}
             isMultiple={question.isMultipleAnswer}
             questionState={{
@@ -95,6 +105,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionMultipleShort
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             questionState={{
               isFirstQuestion: true,
               previousQuestion: () => {},
@@ -107,6 +119,8 @@ const WrongQuestionAnswer = ({ wrongId }: { wrongId: number }) => {
         return (
           <QuestionShortAnswer
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             questionState={{
               isFirstQuestion: true,
               previousQuestion: () => {},

@@ -1,9 +1,9 @@
-import { Separator } from "../separator";
 import { Input } from "../input";
 import { useEffect, useRef, useState } from "react";
 import SubmitButton from "./SubmitButton";
 import ResultDialog from "./ResultDialog";
 import ResultDialogByWrong from "./ResultDialogByWrong";
+import { QuestionPhoto, QuestionPrompt } from "./QuestionPrompt";
 
 // 1. 상태 및 액션 타입 정의
 interface QuestionState {
@@ -22,6 +22,8 @@ interface QuestionAnswerState {
 
 interface QuestionShortAnswerProps {
   question: string;
+  additionalText?: string | null;
+  photos?: QuestionPhoto[] | null;
   initialUserAnswer?: string;
   // Hooks 대신 전달받을 상태 객체
   questionState: QuestionState;
@@ -31,6 +33,8 @@ interface QuestionShortAnswerProps {
 
 export const QuestionShortAnswer = ({
   question,
+  additionalText,
+  photos,
   initialUserAnswer,
   questionState,
   answerState,
@@ -85,11 +89,11 @@ export const QuestionShortAnswer = ({
           )}
 
       <div className="bg-background mx-auto w-full">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
-          {question}
-        </h2>
-
-        <Separator className="mt-2 mb-3" />
+        <QuestionPrompt
+          question={question}
+          additionalText={additionalText}
+          photos={photos}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid w-full gap-1.5">

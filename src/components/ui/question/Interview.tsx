@@ -1,9 +1,9 @@
 import { Textarea } from "../textarea";
-import { Separator } from "../separator";
 import SubmitButton from "./SubmitButton";
 import ResultDialog from "./ResultDialog";
 import { useState } from "react";
 import ResultDialogByWrong from "./ResultDialogByWrong";
+import { QuestionPhoto, QuestionPrompt } from "./QuestionPrompt";
 
 // 1. Props 타입을 정의합니다.
 // (실제 프로젝트의 타입 정의에 맞춰 any 등을 구체적인 타입으로 변경해주세요)
@@ -22,6 +22,8 @@ interface QuestionAnswerState {
 
 interface QuestionInterviewProps {
   question: string;
+  additionalText?: string | null;
+  photos?: QuestionPhoto[] | null;
   initialUserAnswer?: string;
   // 두 훅의 데이터를 객체 형태로 받습니다.
   questionState: QuestionState;
@@ -31,6 +33,8 @@ interface QuestionInterviewProps {
 
 export const QuestionInterview = ({
   question,
+  additionalText,
+  photos,
   initialUserAnswer,
   questionState,
   answerState,
@@ -70,11 +74,11 @@ export const QuestionInterview = ({
           )}
 
       <div className="bg-background mx-auto w-full">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          {question}
-        </h2>
-
-        <Separator className="mt-2 mb-3" />
+        <QuestionPrompt
+          question={question}
+          additionalText={additionalText}
+          photos={photos}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid w-full gap-1.5">

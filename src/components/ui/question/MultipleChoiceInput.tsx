@@ -1,9 +1,9 @@
-import { Separator } from "../separator";
 import { Input } from "../input";
 import { useEffect, useRef, useState } from "react";
 import SubmitButton from "./SubmitButton";
 import ResultDialog from "./ResultDialog";
 import ResultDialogByWrong from "./ResultDialogByWrong";
+import { QuestionPhoto, QuestionPrompt } from "./QuestionPrompt";
 
 interface OptionItem {
   id: number;
@@ -25,6 +25,8 @@ interface QuestionAnswerState {
 
 interface QuestionMultipleChoiceInputProps {
   question: string;
+  additionalText?: string | null;
+  photos?: QuestionPhoto[] | null;
   options: OptionItem[];
   isMultiple: boolean;
   initialUserAnswer?: string;
@@ -35,6 +37,8 @@ interface QuestionMultipleChoiceInputProps {
 
 export const QuestionMultipleChoiceInput = ({
   question,
+  additionalText,
+  photos,
   options,
   isMultiple,
   initialUserAnswer,
@@ -83,11 +87,11 @@ export const QuestionMultipleChoiceInput = ({
           )}
 
       <div className="bg-background mx-auto w-full">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
-          {question}
-        </h2>
-
-        <Separator className="mt-2 mb-3" />
+        <QuestionPrompt
+          question={question}
+          additionalText={additionalText}
+          photos={photos}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="rounded-xl border bg-slate-50/80 p-4 space-y-3">

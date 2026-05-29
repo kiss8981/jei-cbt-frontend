@@ -1,9 +1,9 @@
 import { Input } from "../input";
-import { Separator } from "../separator";
 import { useState, useMemo } from "react";
 import SubmitButton from "./SubmitButton";
 import ResultDialog from "./ResultDialog";
 import ResultDialogByWrong from "./ResultDialogByWrong";
+import { QuestionPhoto, QuestionPrompt } from "./QuestionPrompt";
 
 // 1. 상태 및 액션 타입 정의 (공통 패턴)
 interface QuestionState {
@@ -29,6 +29,8 @@ interface ShortAnswerItem {
 
 interface QuestionMultipleShortProps {
   question: string;
+  additionalText?: string | null;
+  photos?: QuestionPhoto[] | null;
   initialUserAnswer?: ShortAnswerItem[]; // 초기값 지원을 위해 추가
   // Hooks 대신 전달받을 상태 객체
   questionState: QuestionState;
@@ -38,6 +40,8 @@ interface QuestionMultipleShortProps {
 
 export const QuestionMultipleShort = ({
   question,
+  additionalText,
+  photos,
   initialUserAnswer,
   questionState,
   answerState,
@@ -169,11 +173,11 @@ export const QuestionMultipleShort = ({
           )}
 
       <div className="bg-background mx-auto w-full">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          다음 빈칸에 알맞은 말을 넣으세요.
-        </h2>
-
-        <Separator className="mt-2 mb-3" />
+        <QuestionPrompt
+          question="다음 빈칸에 알맞은 말을 넣으세요."
+          additionalText={additionalText}
+          photos={photos}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div

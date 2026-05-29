@@ -6,5 +6,11 @@ const CDN_URL = "https://jei-cbt-project.s3.ap-northeast-2.amazonaws.com";
  * @returns 완전한 이미지 URL
  */
 export const getImageUrl = (imagePath: string): string => {
-  return `${CDN_URL}/${imagePath}`;
+  if (!imagePath) return "";
+
+  if (/^(https?:)?\/\//.test(imagePath) || imagePath.startsWith("data:")) {
+    return imagePath;
+  }
+
+  return `${CDN_URL}/${imagePath.replace(/^\/+/, "")}`;
 };
