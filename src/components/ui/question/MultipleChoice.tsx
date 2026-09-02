@@ -1,4 +1,3 @@
-import { Separator } from "../separator";
 import { RadioGroup, RadioGroupItem } from "../radio-group";
 import { Checkbox } from "../checkbox";
 import { Label } from "../label";
@@ -8,6 +7,7 @@ import ResultDialog from "./ResultDialog";
 import BottomKeypad from "./BottomKeypad";
 import { MultipleChoiceSegment } from "./MultipleChoiceSegment";
 import ResultDialogByWrong from "./ResultDialogByWrong";
+import { QuestionPhoto, QuestionPrompt } from "./QuestionPrompt";
 
 // 1. 옵션 타입
 interface OptionItem {
@@ -32,6 +32,8 @@ interface QuestionAnswerState {
 // 3. 컴포넌트 Prop 타입 수정
 interface QuestionChoiceProps {
   question: string;
+  additionalText?: string | null;
+  photos?: QuestionPhoto[] | null;
   isMultiple: boolean;
   options: OptionItem[];
   initialUserAnswer?: number[];
@@ -43,6 +45,8 @@ interface QuestionChoiceProps {
 
 export const QuestionMultipleChoice = ({
   question,
+  additionalText,
+  photos,
   isMultiple,
   options,
   initialUserAnswer,
@@ -121,16 +125,17 @@ export const QuestionMultipleChoice = ({
           )}
 
       <div className="bg-background mx-auto w-full">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
-          {question}
+        <QuestionPrompt
+          question={question}
+          additionalText={additionalText}
+          photos={photos}
+        >
           {isMultiple && (
             <span className="text-sm font-normal text-muted-foreground ml-2">
               (복수 선택 가능)
             </span>
           )}
-        </h2>
-
-        <Separator className="mt-2 mb-3" />
+        </QuestionPrompt>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">

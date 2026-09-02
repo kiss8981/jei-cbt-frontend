@@ -29,6 +29,8 @@ const QuestionSessionAnswer = () => {
           <QuestionTrueFalse
             key={questionKey}
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             initialUserAnswer={(userAnswer as unknown as boolean) || false}
             questionState={questionState}
             answerState={answerState}
@@ -40,6 +42,8 @@ const QuestionSessionAnswer = () => {
           <QuestionInterview
             key={questionKey}
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             initialUserAnswer={(userAnswer as string) || ""}
             questionState={questionState}
             answerState={answerState}
@@ -51,6 +55,8 @@ const QuestionSessionAnswer = () => {
           <QuestionMatching
             key={questionKey}
             question={question.title}
+            additionalText={question.additionalText}
+            photos={question.photos}
             leftItems={question.leftItems}
             rightItems={question.rightItems}
             initialUserAnswer={
@@ -66,6 +72,8 @@ const QuestionSessionAnswer = () => {
           <QuestionMultipleChoice
             key={questionKey}
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             options={question.choices}
             isMultiple={question.isMultipleAnswer}
             initialUserAnswer={(userAnswer as number[]) || []}
@@ -79,6 +87,8 @@ const QuestionSessionAnswer = () => {
           <QuestionMultipleChoiceInput
             key={questionKey}
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             options={question.choices}
             isMultiple={question.isMultipleAnswer}
             initialUserAnswer={(userAnswer as string) || ""}
@@ -92,6 +102,8 @@ const QuestionSessionAnswer = () => {
           <QuestionMultipleShort
             key={questionKey}
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             questionState={questionState}
             answerState={answerState}
             isSession
@@ -102,6 +114,8 @@ const QuestionSessionAnswer = () => {
           <QuestionShortAnswer
             key={questionKey}
             question={question.question}
+            additionalText={question.additionalText}
+            photos={question.photos}
             initialUserAnswer={(userAnswer as string) || ""}
             questionState={questionState}
             answerState={answerState}
