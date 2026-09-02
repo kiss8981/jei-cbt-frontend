@@ -1,7 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
-import { ArrowLeft, CalendarDays, Paperclip } from "lucide-react";
+import { CalendarDays, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotice } from "@/app/(app)/_hooks/useNotices";
 import useAppRouter from "@/hooks/useAppRouter";
@@ -14,7 +14,6 @@ export function NoticeDetailView({ id }: { id: number }) {
 
   return (
     <div className="mx-auto min-h-[100dvh] w-full max-w-3xl bg-white">
-      <header className="sticky top-0 z-10 flex items-center gap-2 border-b bg-white/95 px-3 py-3 backdrop-blur"><Button size="icon" variant="ghost" onClick={() => navigate("back")}><ArrowLeft /></Button><span className="font-semibold">게시글</span></header>
       <article className="px-5 py-6">
         <h1 className="break-words text-2xl font-bold leading-tight">{notice.title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-4 border-b pb-5 text-xs text-muted-foreground"><span className="flex items-center gap-1"><CalendarDays className="size-3.5" />{dayjs(notice.createdAt).format("YYYY.MM.DD HH:mm")}</span>{notice.attachmentCount > 0 && <span className="flex items-center gap-1"><Paperclip className="size-3.5" />첨부 {notice.attachmentCount}개</span>}</div>
@@ -23,4 +22,3 @@ export function NoticeDetailView({ id }: { id: number }) {
     </div>
   );
 }
-
