@@ -1,7 +1,7 @@
 import WrongQuestionListPage from "./_components/Wrongs";
 
 export const metadata = {
-  title: "틀린 문제 복습",
+  title: "오답문제 복습",
 };
 
 const LearnUnitPage = () => {

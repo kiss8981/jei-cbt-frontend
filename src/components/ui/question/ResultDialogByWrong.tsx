@@ -8,6 +8,8 @@ import {
 } from "../dialog";
 import { SubmissionAnswerResponseAppDto } from "@/lib/http/apis/dtos/app/question/submission-answer-response.app.dto";
 import { Button } from "../button";
+import useAppRouter from "@/hooks/useAppRouter";
+import useAppVersion from "@/hooks/useAppVersion";
 import { useRouter } from "next/navigation";
 
 const ResultDialogByWrong = ({
@@ -20,10 +22,18 @@ const ResultDialogByWrong = ({
   setIsResultOpen: (open: boolean) => void;
 }) => {
   const correct = result?.isCorrect ?? false;
+  const { navigate } = useAppRouter();
   const router = useRouter();
+  const { supportsNativeBottomTabs } = useAppVersion();
 
   const handleClose = () => {
     setIsResultOpen(false);
+
+    if (supportsNativeBottomTabs) {
+      navigate("back");
+      return;
+    }
+
     router.back();
   };
 

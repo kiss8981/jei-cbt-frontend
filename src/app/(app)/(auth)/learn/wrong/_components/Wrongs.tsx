@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import {
   Card,
@@ -25,7 +26,7 @@ import { useInView } from "react-intersection-observer";
 import { GetWrongQuestionListAppDto } from "@/lib/http/apis/dtos/app/question/get-wrong-question-list.app.dto";
 import { CalendarIcon, Target } from "lucide-react"; // 아이콘 추가 (선택사항)
 import useAppRouter from "@/hooks/useAppRouter";
-import { useRouter } from "next/navigation";
+import useAppVersion from "@/hooks/useAppVersion";
 
 const WrongQuestionListPage = () => {
   const [searchParams, setSearchParams] =
@@ -44,6 +45,7 @@ const WrongQuestionListPage = () => {
   });
   const { navigate } = useAppRouter();
   const router = useRouter();
+  const { supportsNativeBottomTabs } = useAppVersion();
 
   const { wrongQuestions, totalCount, isLoading, error } =
     useQuestionsWrong(searchParams);
@@ -205,7 +207,16 @@ const WrongQuestionListPage = () => {
                       size="sm"
                       variant="default"
                       className="h-8 text-xs px-4 rounded-full"
-                      onClick={() => router.push(`/learn/wrong/${q.id}`)}
+                      onClick={() => {
+                        const path = `/learn/wrong/${q.id}`;
+
+                        if (supportsNativeBottomTabs) {
+                          navigate("push", path);
+                          return;
+                        }
+
+                        router.push(path);
+                      }}
                     >
                       학습하기
                     </Button>

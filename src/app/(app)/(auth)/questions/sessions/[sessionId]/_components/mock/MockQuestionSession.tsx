@@ -53,9 +53,9 @@ const MockQuestionSession = () => {
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={key} // 2. 핵심: key가 변경될 때마다 애니메이션이 트리거됩니다.
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="w-full h-full"
         >
