@@ -25,4 +25,10 @@ export const SidebarItems = {
       activePaths: ["/admin/learn-records"],
     },
   },
+  게시판: {
+    "게시판 관리": {
+      path: "/admin/notices",
+      activePaths: ["/admin/notices"],
+    },
+  },
 };

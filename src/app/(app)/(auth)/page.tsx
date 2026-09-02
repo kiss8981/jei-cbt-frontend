@@ -166,6 +166,14 @@ export default function Home() {
               >
                 오답문제 복습
               </Button>
+              <Button
+                onClick={() => navigate("push", "/notices")}
+                className="w-full sm:col-span-2"
+                size="lg"
+                variant="outline"
+              >
+                학습자료 및 공지
+              </Button>
             </div>
           </div>
         </div>

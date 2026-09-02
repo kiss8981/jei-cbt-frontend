@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,17 +7,8 @@ import {
   DialogTitle,
 } from "../dialog";
 import { SubmissionAnswerResponseAppDto } from "@/lib/http/apis/dtos/app/question/submission-answer-response.app.dto";
-import { useQuestionSessionStore } from "@/lib/store/providers/question-session.provider";
 import { Button } from "../button";
-import useAppRouter from "@/hooks/useAppRouter";
-import { SessionType } from "@/lib/http/apis/dtos/common/session-type.enum";
 import { useRouter } from "next/navigation";
-
-interface ResultDialogByWrongProps {
-  result: SubmissionAnswerResponseAppDto | null;
-  isResultOpen: boolean;
-  setIsResultOpen: (open: boolean) => void;
-}
 
 const ResultDialogByWrong = ({
   result,
@@ -30,7 +20,6 @@ const ResultDialogByWrong = ({
   setIsResultOpen: (open: boolean) => void;
 }) => {
   const correct = result?.isCorrect ?? false;
-  const { navigate } = useAppRouter();
   const router = useRouter();
 
   const handleClose = () => {
@@ -40,7 +29,7 @@ const ResultDialogByWrong = ({
 
   return (
     <Dialog open={isResultOpen} onOpenChange={setIsResultOpen}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-hidden sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className={correct ? "text-green-600" : "text-red-600"}>
             {correct ? "정답입니다 🎉" : "오답입니다 😥"}
@@ -70,9 +59,9 @@ const ResultDialogByWrong = ({
           )}
 
           {result?.explanation && (
-            <div className="rounded-xl bg-muted p-4 text-sm leading-relaxed">
-              <div className="font-semibold mb-1">해설</div>
-              <p className="whitespace-pre-wrap">{result.explanation}</p>
+            <div className="flex max-h-[240px] min-h-0 flex-col rounded-xl bg-muted p-4 text-sm leading-relaxed">
+              <div className="mb-1 shrink-0 font-semibold">해설</div>
+              <p className="min-h-0 overflow-y-auto overscroll-contain whitespace-pre-wrap break-words pr-1">{result.explanation}</p>
             </div>
           )}
         </div>

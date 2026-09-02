@@ -1,6 +1,8 @@
-import { IsString } from 'class-validator';
-
 export class CreateS3PresignedUrlsAdminDto {
-  @IsString({ each: true })
-  filenames: string[];
+  purpose: "QUESTION" | "NOTICE";
+  files: Array<{
+    fileName: string;
+    mimeType: string;
+    size: number;
+  }>;
 }

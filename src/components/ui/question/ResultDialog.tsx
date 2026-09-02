@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -87,7 +86,7 @@ const ResultDialog = ({
           onConfirm={onClickMockEnd}
         />
       ) : (
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-hidden sm:max-w-lg">
           <DialogHeader>
             <DialogTitle
               className={correct ? "text-green-600" : "text-red-600"}
@@ -115,9 +114,9 @@ const ResultDialog = ({
             )}
 
             {result?.explanation && (
-              <div className="rounded-xl bg-muted p-4 text-sm leading-relaxed">
-                <div className="font-semibold mb-1">해설</div>
-                <p className="whitespace-pre-wrap">{result.explanation}</p>
+              <div className="flex max-h-[240px] min-h-0 flex-col rounded-xl bg-muted p-4 text-sm leading-relaxed">
+                <div className="mb-1 shrink-0 font-semibold">해설</div>
+                <p className="min-h-0 overflow-y-auto overscroll-contain whitespace-pre-wrap break-words pr-1">{result.explanation}</p>
               </div>
             )}
           </div>

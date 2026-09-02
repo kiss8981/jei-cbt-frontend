@@ -6,7 +6,8 @@ import { adminHttp, BaseResponse } from "@/lib/http/admin-http";
 
 interface UseS3PresignedUrlsReturn {
   getPresignedUrls: (
-    filenames: string[]
+    files: File[],
+    purpose?: "QUESTION" | "NOTICE"
   ) => Promise<GetS3PresignedUrlAdminDto[]>;
   isLoading: boolean;
   error: string | null;
@@ -17,9 +18,10 @@ export function useS3PresignedUrls(): UseS3PresignedUrlsReturn {
   const [error, setError] = useState<string | null>(null);
 
   const getPresignedUrls = async (
-    filenames: string[]
+    files: File[],
+    purpose: "QUESTION" | "NOTICE" = "QUESTION"
   ): Promise<GetS3PresignedUrlAdminDto[]> => {
-    if (!filenames.length) {
+    if (!files.length) {
       throw new Error("파일명이 필요합니다.");
     }
 
@@ -28,13 +30,21 @@ export function useS3PresignedUrls(): UseS3PresignedUrlsReturn {
 
     try {
       const requestData: CreateS3PresignedUrlsAdminDto = {
-        filenames,
+        purpose,
+        files: files.map(file => ({
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+        })),
       };
 
       const response = await adminHttp.post<
         BaseResponse<GetS3PresignedUrlAdminDto[]>
       >("/admin/upload/presigned-urls", requestData);
 
+      if (response.data?.code !== 200) {
+        throw new Error(response.data?.message || "Presigned URL 발급에 실패했습니다.");
+      }
       if (response.data?.data) {
         return response.data.data;
       } else {

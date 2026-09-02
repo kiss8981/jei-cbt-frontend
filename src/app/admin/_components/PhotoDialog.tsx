@@ -177,8 +177,10 @@ export function PhotoDialog({
           {}
         );
 
-        const filenames = compressedFiles.map((file, idx) => file.name);
-        const presignedUrls = await getPresignedUrls(filenames);
+        const presignedUrls = await getPresignedUrls(
+          compressedFiles,
+          "QUESTION"
+        );
 
         const uploads = presignedUrls.map((urlData, idx) => ({
           file: compressedFiles[idx],
@@ -192,11 +194,8 @@ export function PhotoDialog({
           throw new Error("S3 업로드에 성공한 파일이 없습니다.");
         }
 
-        // uploadUrl 배열 추출
-        const uploadUrls = presignedUrls.map(urlData => urlData.key);
-
         // DTO 생성
-        uploadUrls.forEach(key => {
+        uploadedKeys.forEach(key => {
           dtos.push({
             key,
             orderIndex: 0,
