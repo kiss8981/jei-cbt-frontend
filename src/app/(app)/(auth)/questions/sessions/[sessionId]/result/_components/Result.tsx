@@ -129,6 +129,7 @@ const QuestionSessionResult = ({ sessionId }: { sessionId: number }) => {
 
       {/* 2. 문항별 상세 리스트 (카드 형태 변환) */}
       <section className="space-y-4">
+        <p className="text-sm text-muted-foreground px-1">채점 결과는 풀이 당시 기준이며 문제 내용은 수정되었을 수 있습니다.</p>
         <div className="flex items-center gap-2 px-1">
           <BookOpen className="w-5 h-5 text-gray-700" />
           <h2 className="text-lg font-bold text-gray-800">문항별 상세 결과</h2>

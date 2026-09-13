@@ -11,7 +11,7 @@ export enum QuestionType {
 export const typeText = (type: QuestionType) => {
   switch (type) {
     case QuestionType.MULTIPLE_CHOICE:
-      return "객관식";
+      return "선다형";
     case QuestionType.MULTIPLE_CHOICE_INPUT:
       return "선다형(보기입력)";
     case QuestionType.MATCHING:

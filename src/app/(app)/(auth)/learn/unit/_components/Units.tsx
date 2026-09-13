@@ -121,9 +121,9 @@ const SelectQuestionTypes = ({
                   />
                   <label htmlFor={type} className="select-none text-lg font-medium">
                     {type === QuestionType.MULTIPLE_CHOICE_INPUT
-                      ? "객관식(보기입력)"
+                      ? "선다형(보기입력)"
                       : type === QuestionType.MULTIPLE_CHOICE
-                        ? "객관식"
+                        ? "선다형"
                         : type === QuestionType.TRUE_FALSE
                           ? "OX 문제"
                           : type === QuestionType.SHORT_ANSWER

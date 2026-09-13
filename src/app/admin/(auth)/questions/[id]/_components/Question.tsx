@@ -164,7 +164,7 @@ const Question = ({ questionId }: { questionId: number }) => {
       // 1. 단답형 매핑
       const shortAnswers =
         question.type === QuestionType.SHORT_ANSWER
-          ? question.correctAnswers || []
+          ? (question.correctAnswers || []).map(answer => ({ id: Number(answer.id), content: answer.content }))
           : [];
 
       // 2. 연결형 매핑
@@ -321,7 +321,7 @@ const Question = ({ questionId }: { questionId: number }) => {
             {question.type === QuestionType.MATCHING &&
               "연결형 문제의 보기 쌍을 관리합니다."}
             {question.type === QuestionType.SHORT_ANSWER &&
-              "단답형 문제의 정답을 관리합니다."}
+              "등록한 정답 중 하나와 일치하면 정답으로 인정됩니다. 괄호·영어·띄어쓰기는 입력한 내용대로 비교합니다."}
           </p>
         </div>
         <Button
@@ -551,7 +551,7 @@ const Question = ({ questionId }: { questionId: number }) => {
             </Card>
           )}
 
-          {/* 3. 선다형(객관식) UI */}
+          {/* 3. 선다형 UI */}
           {(question.type === QuestionType.MULTIPLE_CHOICE ||
             question.type === QuestionType.MULTIPLE_CHOICE_INPUT) && (
             <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500">
