@@ -37,7 +37,7 @@ export function UnitUpdateModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>단원 수정</DialogTitle>
+          <DialogTitle>능력단위 수정</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -49,7 +49,7 @@ export function UnitUpdateModal({
                 prev ? { ...prev, name: e.target.value } : prev
               )
             }
-            placeholder="단원명"
+            placeholder="능력단위명"
           />
 
           <ExamMultiSelect

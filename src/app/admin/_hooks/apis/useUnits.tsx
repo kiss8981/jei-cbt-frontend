@@ -18,6 +18,14 @@ export interface UseUnitsSearchParams {
   limit?: number;
 }
 
+export interface CreateUnitPayload {
+  name: string;
+  examIds: number[];
+}
+
+const revalidateUnits = () =>
+  mutate(key => typeof key === "string" && key.startsWith("/admin/units"));
+
 export function useUnits(searchParams?: UseUnitsSearchParams) {
   const debouncedKeyword = useDebounce(searchParams?.keyword || "", 1000);
 
@@ -51,7 +59,39 @@ export function useUnits(searchParams?: UseUnitsSearchParams) {
   };
 }
 
-export const uesUnitUpdate = (unit: GetUnitAdminDto) => {
+export const useCreateUnit = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleCreate = async (payload: CreateUnitPayload) => {
+    try {
+      setIsLoading(true);
+      const { data } = await adminHttp.post<BaseResponse<GetUnitAdminDto>>(
+        "/admin/units",
+        payload
+      );
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "능력단위 등록에 실패했습니다.");
+      }
+
+      toast.success("능력단위가 등록되었습니다.");
+      revalidateUnits();
+
+      return data;
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    handleCreate,
+    isLoading,
+  };
+};
+
+export const useUnitUpdate = (unit: GetUnitAdminDto) => {
   const [updatedUnit, setUpdatedUnit] = useState<GetUnitAdminDto | null>(unit);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -72,12 +112,12 @@ export const uesUnitUpdate = (unit: GetUnitAdminDto) => {
       );
 
       if (data.code !== 200) {
-        throw new Error(data.message || "단원 수정에 실패했습니다.");
+        throw new Error(data.message || "능력단위 수정에 실패했습니다.");
       }
 
       setUpdatedUnit(data.data);
-      toast.success("단원이 수정되었습니다.");
-      mutate((key) => typeof key === "string" && key.startsWith("/admin/units"));
+      toast.success("능력단위가 수정되었습니다.");
+      revalidateUnits();
 
       return data;
     } catch (error) {
@@ -91,6 +131,37 @@ export const uesUnitUpdate = (unit: GetUnitAdminDto) => {
     handleUpdate,
     updatedUnit,
     setUpdatedUnit,
+    isLoading,
+  };
+};
+
+export const useDeleteUnit = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleDelete = async (unitId: number) => {
+    try {
+      setIsLoading(true);
+      const { data } = await adminHttp.delete<BaseResponse<boolean>>(
+        `/admin/units/${unitId}`
+      );
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "능력단위 삭제에 실패했습니다.");
+      }
+
+      toast.success("능력단위가 삭제되었습니다.");
+      revalidateUnits();
+
+      return data;
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    handleDelete,
     isLoading,
   };
 };
