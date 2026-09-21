@@ -1,24 +1,25 @@
 "use client";
 
-import {
-  useQuestions,
-  UseQuestionsSearchParams,
-} from "@/app/admin/_hooks/apis/useQuestions";
 import { Pagination, PaginationResultCount } from "@/components/ui/pagination";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { UnitsFilter } from "./UnitsFilter";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { UnitsTable } from "./UnitsTable";
 import { useUnitsFilterStore } from "@/lib/store/stores/units-store";
-import { useUnits } from "@/app/admin/_hooks/apis/useUnits";
+import {
+  useUnits,
+  UseUnitsSearchParams,
+} from "@/app/admin/_hooks/apis/useUnits";
+import { UnitCreateModal } from "./UnitCreateModal";
 
 const Units = () => {
   const store = useUnitsFilterStore();
+  const [openCreateModal, setOpenCreateModal] = useState(false);
 
   const apiParams = useMemo(() => {
-    const params: UseQuestionsSearchParams = {
+    const params: UseUnitsSearchParams = {
       page: store.page,
       limit: store.pageSize,
     };
@@ -34,10 +35,24 @@ const Units = () => {
 
   return (
     <>
+      <UnitCreateModal
+        open={openCreateModal}
+        onOpenChange={setOpenCreateModal}
+      />
+
       <div className="flex w-full flex-col gap-4">
         <div className="flex items-center justify-between">
           <Label className="text-lg">능력 단위 관리</Label>
           <div className="flex ml-auto gap-2">
+            <Button
+              type="button"
+              size="default"
+              onClick={() => setOpenCreateModal(true)}
+              variant="outline"
+              className="rounded-xl"
+            >
+              능력단위 등록
+            </Button>
             <Button
               type="button"
               size="default"

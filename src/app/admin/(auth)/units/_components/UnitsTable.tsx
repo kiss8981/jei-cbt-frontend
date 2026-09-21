@@ -10,9 +10,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { GetUnitAdminDto } from "@/lib/http/apis/dtos/admin/question/get-unit.admin.dto";
-import { uesUnitUpdate } from "@/app/admin/_hooks/apis/useUnits";
+import { useUnitUpdate } from "@/app/admin/_hooks/apis/useUnits";
 import { Button } from "@/components/ui/button";
 import { UnitUpdateModal } from "./UnitUpdateModal";
+import { UnitDeleteDialog } from "./UnitDeleteDialog";
 
 interface UnitTableProps {
   items: GetUnitAdminDto[];
@@ -21,14 +22,22 @@ interface UnitTableProps {
   isLoading?: boolean;
 }
 
-const TABLE_HEADERS = ["ID", "능력단위", "시험", "표시여부", "수정"] as const;
+const TABLE_HEADERS = [
+  "ID",
+  "능력단위",
+  "시험",
+  "문제 수",
+  "표시여부",
+  "관리",
+] as const;
 
 const COLUMN_STYLES = [
   "bg-accent align-top w-8",
   "align-top w-24",
   "bg-accent align-top w-40",
+  "align-top w-16",
   "bg-accent align-top w-24",
-  "align-top w-24",
+  "align-top w-32",
 ] as const;
 
 function TableHeaderRow() {
@@ -58,10 +67,13 @@ function LoadingTableBody() {
             <Skeleton className="h-4 w-32" />
           </TableCell>
           <TableCell className={COLUMN_STYLES[3]}>
-            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-8" />
           </TableCell>
           <TableCell className={COLUMN_STYLES[4]}>
-            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell className={COLUMN_STYLES[5]}>
+            <Skeleton className="h-8 w-24" />
           </TableCell>
         </TableRow>
       ))}
@@ -86,8 +98,9 @@ function EmptyTableBody() {
 
 function UnitTableRow({ item }: { item: GetUnitAdminDto }) {
   const [openModal, setOpenModal] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const { handleUpdate, updatedUnit, setUpdatedUnit, isLoading } =
-    uesUnitUpdate(item);
+    useUnitUpdate(item);
 
   return (
     <>
@@ -103,6 +116,12 @@ function UnitTableRow({ item }: { item: GetUnitAdminDto }) {
         isLoading={isLoading}
       />
 
+      <UnitDeleteDialog
+        open={openDeleteDialog}
+        onOpenChange={setOpenDeleteDialog}
+        unit={item}
+      />
+
       <TableRow className="h-24">
         <TableCell className={COLUMN_STYLES[0]}>{item.id}</TableCell>
         <TableCell className={COLUMN_STYLES[1]}>{item.name}</TableCell>
@@ -112,12 +131,29 @@ function UnitTableRow({ item }: { item: GetUnitAdminDto }) {
             : "-"}
         </TableCell>
         <TableCell className={COLUMN_STYLES[3]}>
-          {item.isDisplayed ? "표시" : "숨김"}
+          {item.questionCount ?? 0}
         </TableCell>
         <TableCell className={COLUMN_STYLES[4]}>
-          <Button variant="outline" size="sm" onClick={() => setOpenModal(true)}>
-            수정
-          </Button>
+          {item.isDisplayed ? "표시" : "숨김"}
+        </TableCell>
+        <TableCell className={COLUMN_STYLES[5]}>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setOpenModal(true)}
+            >
+              수정
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:text-destructive"
+              onClick={() => setOpenDeleteDialog(true)}
+            >
+              삭제
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
     </>
