@@ -12,6 +12,10 @@ import { GetQuestionAdminUnionDto } from "@/lib/http/apis/dtos/admin/question/ge
 import { useState } from "react";
 import { toast } from "sonner";
 import { UpdateQuestionAdminDto } from "@/lib/http/apis/dtos/admin/question/update-question.admin.dto";
+import {
+  CreateQuestionAdminDto,
+  CreateQuestionResponseAdminDto,
+} from "@/lib/http/apis/dtos/admin/question/create-question.admin.dto";
 export interface UseQuestionsSearchParams {
   keyword?: string;
   page?: number;
@@ -120,4 +124,35 @@ export const useQuestionUpdate = (questionId: number) => {
     isUpdating, // isLoading 대신 구체적인 명칭 사용
     handleEdit,
   };
+};
+
+export const useQuestionCreate = () => {
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreate = async (payload: CreateQuestionAdminDto) => {
+    try {
+      setIsCreating(true);
+      const { data } = await adminHttp.post<
+        BaseResponse<CreateQuestionResponseAdminDto>
+      >("/admin/questions", payload);
+
+      if (data.code !== 200) {
+        throw new Error(data.message || "문제 등록에 실패했습니다.");
+      }
+
+      toast.success("문제가 성공적으로 등록되었습니다.");
+      return data.data;
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "알 수 없는 오류가 발생했습니다.";
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return { handleCreate, isCreating };
 };

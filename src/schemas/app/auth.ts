@@ -40,3 +40,39 @@ export const signupSchema = z
   });
 
 export type SignupInput = z.infer<typeof signupSchema>;
+
+export const passwordResetPhoneSchema = z.object({
+  phone: z
+    .string()
+    .min(1, { message: "전화번호를 입력해주세요." })
+    .regex(phoneRegex, { message: "올바른 전화번호 형식이 아닙니다." }),
+});
+
+export const passwordResetCodeSchema = z.object({
+  code: z
+    .string()
+    .length(6, { message: "인증번호 6자리를 입력해주세요." })
+    .regex(/^\d{6}$/, { message: "인증번호는 숫자만 입력해주세요." }),
+});
+
+export const passwordResetCompleteSchema = z
+  .object({
+    password: z
+      .string()
+      .min(6, { message: "비밀번호는 최소 6자 이상이어야 합니다." }),
+    passwordConfirmation: z
+      .string()
+      .min(1, { message: "비밀번호를 다시 입력해주세요." }),
+  })
+  .refine(data => data.password === data.passwordConfirmation, {
+    message: "비밀번호가 일치하지 않습니다.",
+    path: ["passwordConfirmation"],
+  });
+
+export type PasswordResetPhoneInput = z.infer<
+  typeof passwordResetPhoneSchema
+>;
+export type PasswordResetCodeInput = z.infer<typeof passwordResetCodeSchema>;
+export type PasswordResetCompleteInput = z.infer<
+  typeof passwordResetCompleteSchema
+>;
