@@ -1,8 +1,10 @@
-import React from "react";
+import Question from "../[id]/_components/Question";
 
-const AdminCreateQuestionPage: React.FC = () => {
+const AdminCreateQuestionPage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white"></div>
+    <div className="flex flex-col px-8 py-4 gap-8">
+      <Question />
+    </div>
   );
 };
 

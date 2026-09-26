@@ -7,6 +7,12 @@ import { LoginUserAuthAppDto } from "../dtos/app/auth/login-user.auth.dto";
 import { LoginUserResponseAuthAppDto } from "../dtos/app/auth/login-user-response.auth.dto";
 import { MeUserAuthAppDto } from "../dtos/app/auth/me.auth.dto";
 import { getAuthStoreInstance } from "@/lib/store/stores/auth.store";
+import {
+  CompletePasswordResetAuthAppDto,
+  RequestPasswordResetAuthAppDto,
+  VerifyPasswordResetAuthAppDto,
+  VerifyPasswordResetResponseAuthAppDto,
+} from "../dtos/app/auth/password-reset.auth.dto";
 
 export const setAuth = async (accessToken: string, refreshToken: string) => {
   const { setTokens } = getAuthStoreInstance().getState();
@@ -75,6 +81,50 @@ export const signout = async () => {
 
   if (response.data.code !== 200) {
     throw new Error(response.data.message || "회원 탈퇴에 실패했습니다.");
+  }
+
+  return response.data;
+};
+
+export const requestPasswordReset = async (
+  dto: RequestPasswordResetAuthAppDto
+) => {
+  const response = await http.post<BaseResponse<boolean>>(
+    "/auth/password-reset/request",
+    dto
+  );
+
+  if (response.data.code !== 200) {
+    throw new Error(response.data.message || "인증번호 발송에 실패했습니다.");
+  }
+
+  return response.data;
+};
+
+export const verifyPasswordReset = async (
+  dto: VerifyPasswordResetAuthAppDto
+) => {
+  const response = await http.post<
+    BaseResponse<VerifyPasswordResetResponseAuthAppDto>
+  >("/auth/password-reset/verify", dto);
+
+  if (response.data.code !== 200) {
+    throw new Error(response.data.message || "인증번호 확인에 실패했습니다.");
+  }
+
+  return response.data;
+};
+
+export const completePasswordReset = async (
+  dto: CompletePasswordResetAuthAppDto
+) => {
+  const response = await http.post<BaseResponse<boolean>>(
+    "/auth/password-reset/complete",
+    dto
+  );
+
+  if (response.data.code !== 200) {
+    throw new Error(response.data.message || "비밀번호 변경에 실패했습니다.");
   }
 
   return response.data;

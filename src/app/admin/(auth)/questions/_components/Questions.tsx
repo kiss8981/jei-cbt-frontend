@@ -8,7 +8,7 @@ import { Pagination, PaginationResultCount } from "@/components/ui/pagination";
 import { useQuestionsFilterStore } from "@/lib/store/stores/questions-store";
 import { useEffect, useMemo, useState } from "react";
 import { QuestionsFilter } from "./QuestionsFilter";
-import { RotateCcw } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { QuestionsTable } from "./QuestionsTable";
@@ -16,6 +16,7 @@ import { QuestionExcel } from "./QuestionExcel";
 import { QuestionBulkDelete } from "./QuestionBulkDelete";
 import { GetQuestionListAdminDto } from "@/lib/http/apis/dtos/admin/question/get-question-list.admin.dto";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const Questions = () => {
   const store = useQuestionsFilterStore();
@@ -71,6 +72,12 @@ const Questions = () => {
         <div className="flex items-center justify-between">
           <Label className="text-lg">문제 관리</Label>
           <div className="flex flex-wrap ml-auto gap-2">
+            <Button asChild>
+              <Link href="/admin/questions/create">
+                <Plus className="h-4 w-4" />
+                개별 등록
+              </Link>
+            </Button>
             <QuestionExcel />
             <Button
               type="button"

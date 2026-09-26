@@ -42,8 +42,10 @@ import {
 // Hooks & Components
 import {
   useQuestion,
+  useQuestionCreate,
   useQuestionUpdate,
 } from "@/app/admin/_hooks/apis/useQuestions";
+import { useUnits } from "@/app/admin/_hooks/apis/useUnits";
 import { PhotoDialog } from "@/app/admin/_components/PhotoDialog";
 import UnsavedChangesBar from "@/app/admin/_components/UnsavedChangesBar";
 
@@ -53,12 +55,57 @@ import {
   AdminUpdateQuestionInput,
 } from "@/schemas/admin/question";
 import { UpdateQuestionAdminDto } from "@/lib/http/apis/dtos/admin/question/update-question.admin.dto";
-import { QuestionType } from "@/lib/http/apis/dtos/common/question-type.enum";
+import {
+  QuestionType,
+  typeText,
+} from "@/lib/http/apis/dtos/common/question-type.enum";
+import { GetQuestionAdminUnionDto } from "@/lib/http/apis/dtos/admin/question/get-question.admin.dto";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import useAppRouter from "@/hooks/useAppRouter";
 
-const Question = ({ questionId }: { questionId: number }) => {
-  const { question, isLoading: isFetching, refetch } = useQuestion(questionId);
-  const { handleEdit, isUpdating } = useQuestionUpdate(questionId);
+const QUESTION_TYPES = Object.values(QuestionType);
+
+const Question = ({ questionId }: { questionId?: number }) => {
+  const isCreate = questionId == null;
+  const { navigate } = useAppRouter();
+  const [createType, setCreateType] = useState<QuestionType>(
+    QuestionType.TRUE_FALSE
+  );
+  const [unitId, setUnitId] = useState("");
+  const {
+    question: fetchedQuestion,
+    isLoading: isFetching,
+    refetch,
+  } = useQuestion(questionId ?? 0);
+  const { handleEdit, isUpdating } = useQuestionUpdate(questionId ?? 0);
+  const { handleCreate, isCreating } = useQuestionCreate();
+  const { units } = useUnits({ page: 1, limit: 1000 });
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+  const question = useMemo(
+    () =>
+      fetchedQuestion ??
+      (isCreate
+        ? ({
+            id: 0,
+            title: "",
+            explanation: "",
+            additionalText: "",
+            unitId: 0,
+            unitName: "",
+            photos: [],
+            createdAt: new Date(),
+            type: createType,
+          } as unknown as GetQuestionAdminUnionDto)
+        : null),
+    [createType, fetchedQuestion, isCreate]
+  );
 
   const form = useForm<AdminUpdateQuestionInput>({
     resolver: zodResolver(adminUpdateQuestionSchema),
@@ -160,7 +207,8 @@ const Question = ({ questionId }: { questionId: number }) => {
 
   // --- Data Loading (Effect) ---
   useEffect(() => {
-    if (question) {
+    if (fetchedQuestion) {
+      const question = fetchedQuestion;
       // 1. 단답형 매핑
       const shortAnswers =
         question.type === QuestionType.SHORT_ANSWER
@@ -225,10 +273,12 @@ const Question = ({ questionId }: { questionId: number }) => {
         answersForInterview: interviewAnswer,
       });
     }
-  }, [question, form]);
+  }, [fetchedQuestion, form]);
 
   // --- Submit Handler ---
   async function onSubmit(values: AdminUpdateQuestionInput) {
+    if (!question) return;
+
     const payload: UpdateQuestionAdminDto = {
       title: values.title,
       explanation: values.explanation,
@@ -274,10 +324,10 @@ const Question = ({ questionId }: { questionId: number }) => {
       // 빈칸 채우기 👈 추가됨
       answersForMultipleShortAnswer:
         question?.type === QuestionType.MULTIPLE_SHORT_ANSWER
-          ? values.answersForMultipleShortAnswer?.map((ans, index) => ({
+          ? values.answersForMultipleShortAnswer?.map(ans => ({
               id: ans.id ?? null,
               content: ans.content,
-              orderIndex: ans.orderIndex, // 배열 순서대로 index 부여 (0, 1, 2...)
+              orderIndex: ans.orderIndex,
             })) || []
           : [],
 
@@ -287,6 +337,47 @@ const Question = ({ questionId }: { questionId: number }) => {
           : undefined,
     };
 
+    if (isCreate) {
+      if (!unitId) {
+        toast.error("능력단위를 선택해주세요.");
+        return;
+      }
+
+      const created = await handleCreate({
+        unitId: Number(unitId),
+        type: question.type,
+        title: values.title,
+        explanation: values.explanation,
+        additionalText: values.additionalText,
+        answersForCorrectAnswerForTrueFalse:
+          payload.answersForCorrectAnswerForTrueFalse,
+        answersForShortAnswer: payload.answersForShortAnswers?.map(
+          answer => answer.content
+        ),
+        answersForMatching: payload.answersForMatching?.map(answer => ({
+          leftItem: answer.leftItem,
+          rightItem: answer.rightItem,
+        })),
+        answersForMultipleChoice: payload.answersForMultipleChoice?.map(
+          answer => ({
+            content: answer.content,
+            isCorrect: answer.isCorrect,
+          })
+        ),
+        answersForMultipleShortAnswer:
+          payload.answersForMultipleShortAnswer?.map(answer => ({
+            content: answer.content,
+            orderIndex: answer.orderIndex,
+          })),
+        answersForInterview: payload.answersForInterview,
+      });
+
+      if (created) {
+        navigate("replace", `/admin/questions/${created.questionId}`);
+      }
+      return;
+    }
+
     const isSuccess = await handleEdit(payload);
 
     if (isSuccess) {
@@ -294,7 +385,7 @@ const Question = ({ questionId }: { questionId: number }) => {
     }
   }
 
-  if (isFetching || !question) {
+  if ((!isCreate && isFetching) || !question) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Spinner className="size-8" />
@@ -307,7 +398,9 @@ const Question = ({ questionId }: { questionId: number }) => {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">문제 수정</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isCreate ? "문제 등록" : "문제 수정"}
+          </h1>
           <p className="text-muted-foreground">
             {question.type === QuestionType.INTERVIEW &&
               "면접 질문과 모범 답안을 관리합니다."}
@@ -324,14 +417,16 @@ const Question = ({ questionId }: { questionId: number }) => {
               "등록한 정답 중 하나와 일치하면 정답으로 인정됩니다. 괄호·영어·띄어쓰기는 입력한 내용대로 비교합니다."}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setIsPhotoDialogOpen(true)}
-          className="gap-2"
-        >
-          <ImageIcon className="size-4" />
-          사진 관리 ({question.photos?.length || 0})
-        </Button>
+        {!isCreate && (
+          <Button
+            variant="outline"
+            onClick={() => setIsPhotoDialogOpen(true)}
+            className="gap-2"
+          >
+            <ImageIcon className="size-4" />
+            사진 관리 ({question.photos?.length || 0})
+          </Button>
+        )}
       </div>
 
       <Form {...form}>
@@ -343,6 +438,45 @@ const Question = ({ questionId }: { questionId: number }) => {
               <CardDescription>질문과 해설을 입력해주세요.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {isCreate && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>능력단위 *</Label>
+                    <Select value={unitId} onValueChange={setUnitId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="능력단위를 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map(unit => (
+                          <SelectItem key={unit.id} value={String(unit.id)}>
+                            {unit.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>문제 유형 *</Label>
+                    <Select
+                      value={createType}
+                      onValueChange={value =>
+                        setCreateType(value as QuestionType)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="문제 유형을 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {QUESTION_TYPES.map(type => (
+                          <SelectItem key={type} value={type}>
+                            {typeText(type)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
               <FormField
                 control={form.control}
                 name="title"
@@ -828,17 +962,23 @@ const Question = ({ questionId }: { questionId: number }) => {
           )}
 
           <UnsavedChangesBar
-            isDirty={isDirty}
+            isDirty={isCreate || isDirty}
             onSave={form.handleSubmit(onSubmit, errors =>
               console.log("❌ Validation Error:", errors)
             )}
-            onReset={() => form.reset()}
-            isSaving={isUpdating}
+            onReset={() => {
+              form.reset();
+              if (isCreate) {
+                setUnitId("");
+                setCreateType(QuestionType.TRUE_FALSE);
+              }
+            }}
+            isSaving={isUpdating || isCreating}
           />
         </form>
       </Form>
 
-      {isPhotoDialogOpen && (
+      {!isCreate && isPhotoDialogOpen && (
         <PhotoDialog
           photos={question.photos}
           endpoint={`/admin/questions/${question.id}/photos`}
